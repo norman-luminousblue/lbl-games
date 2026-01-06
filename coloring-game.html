@@ -317,7 +317,7 @@
                 });
                 
                 // Select first color
-                if (palette.firstChild) {
+                if (palette.firstChild && palette.firstChild.classList) {
                     palette.firstChild.classList.add('selected');
                 }
             }
