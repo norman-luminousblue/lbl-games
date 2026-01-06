@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LBL Activity Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            animation: fadeIn 1s ease-in;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #ffffff;
+            font-size: 1.3em;
+            margin-bottom: 50px;
+            opacity: 0.9;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
+        
+        .game-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        .game-card h2 {
+            color: #764ba2;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+        
+        .game-card p {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .game-card .age-badge {
+            display: inline-block;
+            background: #FF6B35;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .game-card .difficulty {
+            display: inline-block;
+            margin-left: 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+            .subtitle {
+                font-size: 1.1em;
+            }
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .game-icon {
+                font-size: 4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Activity Center</h1>
+        <p class="subtitle">Choose a fun activity to play!</p>
+        
+        <div class="games-grid">
+            <div class="game-card" onclick="loadGame('memory-match.html', 'matching')">
+                <div class="game-icon">🧠</div>
+                <h2>Memory Match</h2>
+                <p>Find all the matching pairs by flipping cards. Test your memory!</p>
+                <span class="age-badge">Ages 5-8</span>
+                <span class="difficulty">⭐ Easy</span>
+            </div>
+            
+            <div class="game-card" onclick="loadGame('coloring-game.html', 'coloring')">
+                <div class="game-icon">🎨</div>
+                <h2>Coloring Fun</h2>
+                <p>Color beautiful pictures with your favorite colors!</p>
+                <span class="age-badge">Ages 5-8</span>
+                <span class="difficulty">⭐ Easy</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function loadGame(gameFile, activityType) {
+            // Store activity type for when game completes
+            sessionStorage.setItem('currentActivityType', activityType);
+            
+            // Navigate to the game
+            window.location.href = gameFile;
+        }
+    </script>
+</body>
+</html>

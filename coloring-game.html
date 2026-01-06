@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Coloring Fun</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        /* Intro Screen */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        #intro-screen h1 {
+            font-size: 3em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            animation: bounce 1s ease-in-out infinite;
+        }
+        #intro-screen .emoji {
+            font-size: 4em;
+            margin-bottom: 30px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        #intro-screen p {
+            font-size: 1.2em;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+        #start-button {
+            margin-top: 30px;
+            padding: 20px 60px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #764ba2;
+            background: #ffffff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        #start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Game Screen */
+        #game-screen {
+            display: none;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #764ba2;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .color-palette {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .color-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .color-btn:hover, .color-btn.selected {
+            transform: scale(1.2);
+            border-color: #333;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        #canvas-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        canvas {
+            border: 3px solid #764ba2;
+            border-radius: 10px;
+            cursor: crosshair;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            font-size: 1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        
+        .btn-clear {
+            background: #ff6b6b;
+        }
+        
+        .btn-done {
+            background: #51cf66;
+        }
+        
+        .btn-back {
+            background: #667eea;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Completion Screen */
+        #completion-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        #completion-screen h1 {
+            color: #764ba2;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        #completion-screen .emoji {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            #intro-screen h1 {
+                font-size: 2em;
+            }
+            .header h1 {
+                font-size: 1.5em;
+            }
+            .color-btn {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Intro Screen -->
+    <div id="intro-screen">
+        <div class="emoji">🎨</div>
+        <h1>Coloring Fun!</h1>
+        <p>Choose your colors and create beautiful artwork!</p>
+        <p>Tap or click on areas to fill them with color.</p>
+        <button id="start-button">Start Coloring</button>
+    </div>
+    
+    <!-- Game Container -->
+    <div id="game-container">
+        <!-- Game Screen -->
+        <div id="game-screen">
+            <div class="header">
+                <h1>🎨 Coloring Fun</h1>
+            </div>
+            
+            <div class="color-palette" id="colorPalette">
+                <!-- Colors will be added by JavaScript -->
+            </div>
+            
+            <div id="canvas-container">
+                <canvas id="coloringCanvas" width="500" height="500"></canvas>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+                <button class="btn btn-clear" onclick="clearCanvas()">Clear</button>
+                <button class="btn btn-done" onclick="completeColoring()">Done!</button>
+            </div>
+        </div>
+        
+        <!-- Completion Screen -->
+        <div id="completion-screen">
+            <div class="emoji">🎉</div>
+            <h1>Amazing Work!</h1>
+            <p style="font-size: 1.2em; color: #666; margin-bottom: 30px;">Your artwork is beautiful!</p>
+            <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+        </div>
+    </div>
+    
+    <script>
+        let canvas, ctx;
+        let currentColor = '#FF6B35';
+        let startTime;
+        let coloredAreas = 0;
+        
+        const colors = [
+            '#FF6B35', '#F7931E', '#FDC830', '#C1D82F', 
+            '#00A8E8', '#0077B6', '#7209B7', '#F72585',
+            '#E63946', '#A8DADC', '#457B9D', '#1D3557',
+            '#06FFA5', '#FFFFFF', '#000000', '#8B4513'
+        ];
+        
+        // Simple shapes to color
+        const shapes = [
+            { type: 'circle', x: 150, y: 150, r: 80, color: null },
+            { type: 'circle', x: 350, y: 150, r: 80, color: null },
+            { type: 'rect', x: 150, y: 280, w: 200, h: 150, color: null },
+            { type: 'triangle', x1: 100, y1: 100, x2: 250, y2: 50, x3: 400, y3: 100, color: null },
+            { type: 'circle', x: 250, y: 350, r: 50, color: null }
+        ];
+        
+        document.getElementById('start-button').addEventListener('click', function() {
+            document.getElementById('intro-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            initGame();
+        });
+        
+        function initGame() {
+            startTime = Date.now();
+            
+            canvas = document.getElementById('coloringCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Make canvas responsive
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Create color palette
+            const palette = document.getElementById('colorPalette');
+            colors.forEach(color => {
+                const btn = document.createElement('div');
+                btn.className = 'color-btn';
+                btn.style.backgroundColor = color;
+                btn.onclick = () => selectColor(color, btn);
+                palette.appendChild(btn);
+            });
+            
+            // Select first color
+            palette.firstChild.classList.add('selected');
+            
+            // Setup canvas click
+            canvas.addEventListener('click', handleCanvasClick);
+            canvas.addEventListener('touchstart', handleCanvasTouch);
+            
+            // Draw initial coloring page
+            drawColoringPage();
+        }
+        
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            const maxWidth = Math.min(500, container.clientWidth - 40);
+            canvas.style.width = maxWidth + 'px';
+            canvas.style.height = maxWidth + 'px';
+        }
+        
+        function selectColor(color, btn) {
+            // Remove selected class from all buttons
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            
+            // Add selected class to clicked button
+            btn.classList.add('selected');
+            currentColor = color;
+        }
+        
+        function drawColoringPage() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            shapes.forEach(shape => {
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 3;
+                
+                if (shape.color) {
+                    ctx.fillStyle = shape.color;
+                } else {
+                    ctx.fillStyle = '#f5f5f5';
+                }
+                
+                if (shape.type === 'circle') {
+                    ctx.beginPath();
+                    ctx.arc(shape.x, shape.y, shape.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                } else if (shape.type === 'rect') {
+                    ctx.fillRect(shape.x, shape.y, shape.w, shape.h);
+                    ctx.strokeRect(shape.x, shape.y, shape.w, shape.h);
+                } else if (shape.type === 'triangle') {
+                    ctx.beginPath();
+                    ctx.moveTo(shape.x1, shape.y1);
+                    ctx.lineTo(shape.x2, shape.y2);
+                    ctx.lineTo(shape.x3, shape.y3);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            });
+        }
+        
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            colorShape(x, y);
+        }
+        
+        function handleCanvasTouch(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const touch = e.touches[0];
+            const x = (touch.clientX - rect.left) * scaleX;
+            const y = (touch.clientY - rect.top) * scaleY;
+            
+            colorShape(x, y);
+        }
+        
+        function colorShape(x, y) {
+            let colored = false;
+            
+            shapes.forEach(shape => {
+                let isInside = false;
+                
+                if (shape.type === 'circle') {
+                    const dx = x - shape.x;
+                    const dy = y - shape.y;
+                    isInside = (dx * dx + dy * dy) <= (shape.r * shape.r);
+                } else if (shape.type === 'rect') {
+                    isInside = x >= shape.x && x <= shape.x + shape.w &&
+                               y >= shape.y && y <= shape.y + shape.h;
+                } else if (shape.type === 'triangle') {
+                    isInside = pointInTriangle(x, y, shape.x1, shape.y1, shape.x2, shape.y2, shape.x3, shape.y3);
+                }
+                
+                if (isInside) {
+                    if (!shape.color) {
+                        coloredAreas++;
+                    }
+                    shape.color = currentColor;
+                    colored = true;
+                }
+            });
+            
+            if (colored) {
+                drawColoringPage();
+            }
+        }
+        
+        function pointInTriangle(px, py, x1, y1, x2, y2, x3, y3) {
+            const area = 0.5 * (-y2 * x3 + y1 * (-x2 + x3) + x1 * (y2 - y3) + x2 * y3);
+            const s = 1 / (2 * area) * (y1 * x3 - x1 * y3 + (y3 - y1) * px + (x1 - x3) * py);
+            const t = 1 / (2 * area) * (x1 * y2 - y1 * x2 + (y1 - y2) * px + (x2 - x1) * py);
+            return s > 0 && t > 0 && (1 - s - t) > 0;
+        }
+        
+        function clearCanvas() {
+            shapes.forEach(shape => shape.color = null);
+            coloredAreas = 0;
+            drawColoringPage();
+        }
+        
+        function completeColoring() {
+            // Calculate score based on colored areas
+            const totalShapes = shapes.length;
+            const coloredShapes = shapes.filter(s => s.color !== null).length;
+            const score = Math.round((coloredShapes / totalShapes) * 100);
+            const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+            
+            // Send completion data to parent Wix page
+            const gameData = {
+                type: 'GAME_COMPLETE',
+                activityType: 'coloring',
+                score: score,
+                coloredAreas: coloredShapes,
+                timeSpent: timeSpent
+            };
+            
+            if (window.parent) {
+                window.parent.postMessage(gameData, '*');
+            }
+            
+            // Show completion screen
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('completion-screen').style.display = 'block';
+        }
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
