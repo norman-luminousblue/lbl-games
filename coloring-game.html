@@ -301,20 +301,26 @@
             canvas.width = 600;
             canvas.height = 400;
             
-            // Create color palette
+            // Create color palette (only if not already created)
             const palette = document.getElementById('colorPalette');
-            colors.forEach(color => {
-                const btn = document.createElement('div');
-                btn.className = 'color-btn';
-                btn.style.backgroundColor = color;
-                btn.onclick = () => selectColor(color, btn);
-                palette.appendChild(btn);
-            });
+            if (palette.children.length === 0) {
+                colors.forEach(color => {
+                    const btn = document.createElement('div');
+                    btn.className = 'color-btn';
+                    btn.style.backgroundColor = color;
+                    btn.onclick = () => selectColor(color, btn);
+                    palette.appendChild(btn);
+                });
+                
+                // Select first color
+                if (palette.firstChild) {
+                    palette.firstChild.classList.add('selected');
+                }
+            }
             
-            // Select first color
-            palette.firstChild.classList.add('selected');
-            
-            // Setup canvas click
+            // Setup canvas click (remove old listeners first)
+            canvas.removeEventListener('click', handleCanvasClick);
+            canvas.removeEventListener('touchstart', handleCanvasTouch);
             canvas.addEventListener('click', handleCanvasClick);
             canvas.addEventListener('touchstart', handleCanvasTouch, { passive: false });
             
