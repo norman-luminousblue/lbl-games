@@ -395,7 +395,7 @@
             });
         }
         
-        function drawSparkle(x, y) {
+        function drawSparkleAndWiggle(x, y, shapeIndex) {
             const particles = [];
             const particleCount = 15;
             
@@ -412,15 +412,55 @@
                 });
             }
             
-            // Animate particles
+            // Animate particles and wiggle
             let frame = 0;
             const maxFrames = 25;
             
             function animateParticles() {
                 frame++;
                 
-                // Draw the colored page
-                drawColoringPage();
+                // Calculate wiggle offset (faster wiggle in first frames)
+                const wiggleIntensity = Math.max(0, 1 - frame / 15);
+                const wiggleX = Math.sin(frame * 0.8) * 4 * wiggleIntensity;
+                const wiggleY = Math.cos(frame * 0.8) * 4 * wiggleIntensity;
+                
+                // Draw all shapes
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                shapes.forEach((shape, index) => {
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 3;
+                    
+                    if (shape.color) {
+                        ctx.fillStyle = shape.color;
+                    } else {
+                        ctx.fillStyle = '#f5f5f5';
+                    }
+                    
+                    // Apply wiggle only to the colored shape
+                    const offsetX = (index === shapeIndex) ? wiggleX : 0;
+                    const offsetY = (index === shapeIndex) ? wiggleY : 0;
+                    
+                    if (shape.type === 'circle') {
+                        ctx.beginPath();
+                        ctx.arc(shape.x + offsetX, shape.y + offsetY, shape.r, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    } else if (shape.type === 'rect') {
+                        ctx.fillRect(shape.x + offsetX, shape.y + offsetY, shape.w, shape.h);
+                        ctx.strokeRect(shape.x + offsetX, shape.y + offsetY, shape.w, shape.h);
+                    } else if (shape.type === 'triangle') {
+                        ctx.beginPath();
+                        ctx.moveTo(shape.x1 + offsetX, shape.y1 + offsetY);
+                        ctx.lineTo(shape.x2 + offsetX, shape.y2 + offsetY);
+                        ctx.lineTo(shape.x3 + offsetX, shape.y3 + offsetY);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                });
                 
                 // Draw particles
                 particles.forEach(p => {
@@ -444,6 +484,9 @@
                 
                 if (frame < maxFrames) {
                     requestAnimationFrame(animateParticles);
+                } else {
+                    // Final redraw without wiggle
+                    drawColoringPage();
                 }
             }
             
@@ -475,6 +518,7 @@
             let colored = false;
             let sparkleX = x;
             let sparkleY = y;
+            let coloredShapeIndex = -1;
             
             console.log('Checking shapes at:', x, y);
             
@@ -511,13 +555,14 @@
                     }
                     shape.color = currentColor;
                     colored = true;
+                    coloredShapeIndex = index;
                 }
             });
             
             if (colored) {
                 console.log('Redrawing with color:', currentColor);
                 drawColoringPage();
-                drawSparkle(sparkleX, sparkleY);
+                drawSparkleAndWiggle(sparkleX, sparkleY, coloredShapeIndex);
             } else {
                 console.log('No shape clicked');
             }
