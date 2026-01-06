@@ -396,30 +396,58 @@
         }
         
         function drawSparkle(x, y) {
-            const sparkles = 8;
-            const sparkleLength = 15;
+            const particles = [];
+            const particleCount = 15;
             
-            ctx.strokeStyle = '#FFD700';
-            ctx.lineWidth = 3;
-            ctx.lineCap = 'round';
-            
-            for (let i = 0; i < sparkles; i++) {
-                const angle = (Math.PI * 2 / sparkles) * i;
-                const x1 = x + Math.cos(angle) * 5;
-                const y1 = y + Math.sin(angle) * 5;
-                const x2 = x + Math.cos(angle) * sparkleLength;
-                const y2 = y + Math.sin(angle) * sparkleLength;
-                
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.stroke();
+            // Create sparkle particles
+            for (let i = 0; i < particleCount; i++) {
+                const angle = (Math.PI * 2 / particleCount) * i + Math.random() * 0.3;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * (2 + Math.random() * 3),
+                    vy: Math.sin(angle) * (2 + Math.random() * 3),
+                    life: 1.0,
+                    size: 3 + Math.random() * 3
+                });
             }
             
-            // Redraw shapes after sparkle
-            setTimeout(() => {
+            // Animate particles
+            let frame = 0;
+            const maxFrames = 25;
+            
+            function animateParticles() {
+                frame++;
+                
+                // Draw the colored page
                 drawColoringPage();
-            }, 300);
+                
+                // Draw particles
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.04;
+                    
+                    if (p.life > 0) {
+                        ctx.fillStyle = `rgba(255, 215, 0, ${p.life})`;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Add white glow
+                        ctx.fillStyle = `rgba(255, 255, 255, ${p.life * 0.5})`;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size * p.life * 0.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+                
+                if (frame < maxFrames) {
+                    requestAnimationFrame(animateParticles);
+                }
+            }
+            
+            animateParticles();
         }
         
         function handleCanvasClick(e) {
