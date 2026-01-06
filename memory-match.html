@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    
+    <script>
+        // Game configuration
+        const config = {
+            type: Phaser.AUTO,
+            width: 600,
+            height: 700,
+            parent: 'game-container',
+            backgroundColor: '#ffffff',
+            scene: {
+                create: create,
+                update: update
+            }
+        };
+
+        const game = new Phaser.Game(config);
+        
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let canClick = true;
+        let movesText, pairsText, titleText;
+        
+        // Card symbols (emojis work great!)
+        const symbols = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊'];
+        const totalPairs = 6;
+
+        function create() {
+            const scene = this;
+            
+            // Title
+            titleText = scene.add.text(300, 30, 'Memory Match!', {
+                fontSize: '32px',
+                fontFamily: 'Arial',
+                color: '#FF6B35',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            
+            // Score displays
+            movesText = scene.add.text(100, 80, 'Moves: 0', {
+                fontSize: '20px',
+                color: '#333'
+            });
+            
+            pairsText = scene.add.text(400, 80, 'Pairs: 0/' + totalPairs, {
+                fontSize: '20px',
+                color: '#333'
+            });
+            
+            // Instructions
+            scene.add.text(300, 120, 'Click cards to find matching pairs!', {
+                fontSize: '16px',
+                color: '#666'
+            }).setOrigin(0.5);
+            
+            // Create card deck (pairs)
+            let deck = [];
+            symbols.forEach(symbol => {
+                deck.push(symbol, symbol); // Add each symbol twice
+            });
+            
+            // Shuffle deck
+            deck = Phaser.Utils.Array.Shuffle(deck);
+            
+            // Create cards in grid (3 columns x 4 rows)
+            const startX = 100;
+            const startY = 170;
+            const cardWidth = 120;
+            const cardHeight = 140;
+            const spacingX = 150;
+            const spacingY = 170;
+            
+            let index = 0;
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 3; col++) {
+                    const x = startX + col * spacingX;
+                    const y = startY + row * spacingY;
+                    const card = createCard(scene, x, y, cardWidth, cardHeight, deck[index], index);
+                    cards.push(card);
+                    index++;
+                }
+            }
+        }
+
+        function createCard(scene, x, y, width, height, symbol, id) {
+            // Card container
+            const card = scene.add.container(x, y);
+            
+            // Card back (face down)
+            const back = scene.add.rectangle(0, 0, width, height, 0x4CAF50);
+            back.setStrokeStyle(3, 0x2E7D32);
+            
+            const questionMark = scene.add.text(0, 0, '?', {
+                fontSize: '64px',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+            
+            // Card front (face up with symbol)
+            const front = scene.add.rectangle(0, 0, width, height, 0xFFFFFF);
+            front.setStrokeStyle(3, 0xCCCCCC);
+            front.setVisible(false);
+            
+            const symbolText = scene.add.text(0, 0, symbol, {
+                fontSize: '64px'
+            }).setOrigin(0.5);
+            symbolText.setVisible(false);
+            
+            // Add to container
+            card.add([back, questionMark, front, symbolText]);
+            
+            // Make interactive
+            back.setInteractive();
+            back.on('pointerdown', () => flipCard(card));
+            
+            // Card data
+            card.setData({
+                id: id,
+                symbol: symbol,
+                isFlipped: false,
+                isMatched: false,
+                back: back,
+                front: front,
+                questionMark: questionMark,
+                symbolText: symbolText
+            });
+            
+            return card;
+        }
+
+        function flipCard(card) {
+            if (!canClick) return;
+            if (card.getData('isFlipped')) return;
+            if (card.getData('isMatched')) return;
+            
+            // Flip animation
+            card.setData('isFlipped', true);
+            card.getData('back').setVisible(false);
+            card.getData('questionMark').setVisible(false);
+            card.getData('front').setVisible(true);
+            card.getData('symbolText').setVisible(true);
+            
+            flippedCards.push(card);
+            
+            // Check if two cards are flipped
+            if (flippedCards.length === 2) {
+                canClick = false;
+                moves++;
+                movesText.setText('Moves: ' + moves);
+                
+                setTimeout(() => checkMatch(), 800);
+            }
+        }
+
+        function checkMatch() {
+            const card1 = flippedCards[0];
+            const card2 = flippedCards[1];
+            
+            if (card1.getData('symbol') === card2.getData('symbol')) {
+                // Match!
+                card1.setData('isMatched', true);
+                card2.setData('isMatched', true);
+                
+                // Gray out matched cards
+                card1.getData('front').setFillStyle(0xE0E0E0);
+                card2.getData('front').setFillStyle(0xE0E0E0);
+                
+                matchedPairs++;
+                pairsText.setText('Pairs: ' + matchedPairs + '/' + totalPairs);
+                
+                flippedCards = [];
+                canClick = true;
+                
+                // Check if game complete
+                if (matchedPairs === totalPairs) {
+                    setTimeout(() => gameComplete(), 500);
+                }
+            } else {
+                // No match - flip back
+                setTimeout(() => {
+                    card1.setData('isFlipped', false);
+                    card1.getData('back').setVisible(true);
+                    card1.getData('questionMark').setVisible(true);
+                    card1.getData('front').setVisible(false);
+                    card1.getData('symbolText').setVisible(false);
+                    
+                    card2.setData('isFlipped', false);
+                    card2.getData('back').setVisible(true);
+                    card2.getData('questionMark').setVisible(true);
+                    card2.getData('front').setVisible(false);
+                    card2.getData('symbolText').setVisible(false);
+                    
+                    flippedCards = [];
+                    canClick = true;
+                }, 500);
+            }
+        }
+
+        function gameComplete() {
+            // Calculate score (fewer moves = better)
+            const maxMoves = totalPairs * 4; // Maximum expected moves
+            const score = Math.max(0, Math.round((1 - (moves / maxMoves)) * 100));
+            
+            // Send completion data to parent Wix page
+            const gameData = {
+                type: 'GAME_COMPLETE',
+                activityType: 'matching',
+                score: score,
+                moves: moves,
+                timeSpent: Math.floor(Date.now() / 1000) - startTime
+            };
+            
+            // Post message to parent window (Wix)
+            if (window.parent) {
+                window.parent.postMessage(gameData, '*');
+            }
+            
+            // Show completion message
+            titleText.setText('🎉 You Won! 🎉');
+            titleText.setFontSize('40px');
+            
+            // Add play again button
+            const playAgainBtn = game.scene.scenes[0].add.rectangle(300, 650, 200, 50, 0xFF6B35);
+            playAgainBtn.setInteractive();
+            const btnText = game.scene.scenes[0].add.text(300, 650, 'Play Again', {
+                fontSize: '24px',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+            
+            playAgainBtn.on('pointerdown', () => {
+                location.reload();
+            });
+        }
+
+        function update() {
+            // Game loop (not needed for this simple game)
+        }
+        
+        // Track start time
+        const startTime = Math.floor(Date.now() / 1000);
+    </script>
+</body>
+</html>
