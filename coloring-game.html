@@ -308,17 +308,24 @@
             console.log('Palette children:', palette ? palette.children.length : 'null');
             
             if (palette && palette.children.length === 0) {
-                colors.forEach(color => {
+                console.log('Creating color buttons...');
+                colors.forEach((color, index) => {
                     const btn = document.createElement('div');
                     btn.className = 'color-btn';
                     btn.style.backgroundColor = color;
                     btn.onclick = () => selectColor(color, btn);
                     palette.appendChild(btn);
+                    console.log('Added button', index, color);
                 });
+                
+                console.log('Buttons created. FirstChild:', palette.firstChild);
+                console.log('FirstChild type:', typeof palette.firstChild);
+                console.log('FirstChild classList:', palette.firstChild ? palette.firstChild.classList : 'no firstChild');
                 
                 // Select first color
                 if (palette.firstChild && palette.firstChild.classList) {
                     palette.firstChild.classList.add('selected');
+                    console.log('Selected first button');
                 }
             }
             
