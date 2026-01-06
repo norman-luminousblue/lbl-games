@@ -155,14 +155,14 @@
         .controls {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 10px;
+            margin-top: 10px;
             flex-wrap: wrap;
         }
         
         .btn {
-            padding: 12px 30px;
-            font-size: 1em;
+            padding: 10px 25px;
+            font-size: 0.9em;
             font-weight: bold;
             border: none;
             border-radius: 25px;
@@ -276,13 +276,13 @@
             '#06FFA5', '#FFFFFF', '#000000', '#8B4513'
         ];
         
-        // Simple shapes to color
+        // Simple shapes to color - adjusted for 600x400 canvas
         const shapes = [
-            { type: 'circle', x: 150, y: 150, r: 80, color: null },
-            { type: 'circle', x: 350, y: 150, r: 80, color: null },
-            { type: 'rect', x: 150, y: 280, w: 200, h: 150, color: null },
-            { type: 'triangle', x1: 100, y1: 100, x2: 250, y2: 50, x3: 400, y3: 100, color: null },
-            { type: 'circle', x: 250, y: 350, r: 50, color: null }
+            { type: 'circle', x: 150, y: 120, r: 60, color: null },
+            { type: 'circle', x: 450, y: 120, r: 60, color: null },
+            { type: 'rect', x: 200, y: 220, w: 200, h: 120, color: null },
+            { type: 'triangle', x1: 100, y1: 80, x2: 300, y2: 40, x3: 500, y3: 80, color: null },
+            { type: 'circle', x: 300, y: 280, r: 40, color: null }
         ];
         
         document.getElementById('start-button').addEventListener('click', function() {
@@ -372,6 +372,7 @@
             const x = (e.clientX - rect.left) * (canvas.width / rect.width);
             const y = (e.clientY - rect.top) * (canvas.height / rect.height);
             
+            console.log('Canvas click:', x, y);
             colorShape(x, y);
         }
         
@@ -382,13 +383,16 @@
             const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
             const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
             
+            console.log('Canvas touch:', x, y);
             colorShape(x, y);
         }
         
         function colorShape(x, y) {
             let colored = false;
             
-            shapes.forEach(shape => {
+            console.log('Checking shapes at:', x, y);
+            
+            shapes.forEach((shape, index) => {
                 let isInside = false;
                 
                 if (shape.type === 'circle') {
@@ -403,6 +407,7 @@
                 }
                 
                 if (isInside) {
+                    console.log('Hit shape:', index, shape.type);
                     if (!shape.color) {
                         coloredAreas++;
                     }
@@ -412,7 +417,10 @@
             });
             
             if (colored) {
+                console.log('Redrawing with color:', currentColor);
                 drawColoringPage();
+            } else {
+                console.log('No shape clicked');
             }
         }
         
