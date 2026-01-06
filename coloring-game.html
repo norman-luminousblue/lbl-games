@@ -292,6 +292,7 @@
         });
         
         function initGame() {
+            console.log('InitGame called - v2');
             startTime = Date.now();
             
             canvas = document.getElementById('coloringCanvas');
@@ -303,7 +304,10 @@
             
             // Create color palette (only if not already created)
             const palette = document.getElementById('colorPalette');
-            if (palette.children.length === 0) {
+            console.log('Palette element:', palette);
+            console.log('Palette children:', palette ? palette.children.length : 'null');
+            
+            if (palette && palette.children.length === 0) {
                 colors.forEach(color => {
                     const btn = document.createElement('div');
                     btn.className = 'color-btn';
