@@ -2,43 +2,165 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Memory Match Game</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             margin: 0;
             padding: 0;
-            background: #f4f4f4;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
         }
         #game-container {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Intro Screen */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        #intro-screen h1 {
+            font-size: 3em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            animation: bounce 1s ease-in-out infinite;
+        }
+        #intro-screen .emoji {
+            font-size: 4em;
+            margin-bottom: 30px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        #intro-screen p {
+            font-size: 1.2em;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+        #start-button {
+            margin-top: 30px;
+            padding: 20px 60px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #764ba2;
+            background: #ffffff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        #start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+        }
+        #start-button:active {
+            transform: translateY(-1px);
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            #intro-screen h1 {
+                font-size: 2em;
+            }
+            #intro-screen .emoji {
+                font-size: 3em;
+            }
+            #intro-screen p {
+                font-size: 1em;
+                padding: 0 10px;
+            }
+            #start-button {
+                padding: 15px 40px;
+                font-size: 1.2em;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Intro Screen -->
+    <div id="intro-screen">
+        <div class="emoji">🧠✨</div>
+        <h1>Memory Match!</h1>
+        <p>Find all the matching pairs by flipping cards.</p>
+        <p>The fewer moves you make, the higher your score!</p>
+        <button id="start-button">Start Game</button>
+    </div>
+    
     <div id="game-container"></div>
     
     <script>
-        // Game configuration
-        const config = {
-            type: Phaser.AUTO,
-            width: 600,
-            height: 700,
-            parent: 'game-container',
-            backgroundColor: '#ffffff',
-            scene: {
-                create: create,
-                update: update
-            }
-        };
+        // Start game when button clicked
+        document.getElementById('start-button').addEventListener('click', function() {
+            document.getElementById('intro-screen').style.display = 'none';
+            initGame();
+        });
+        
+        let gameInitialized = false;
+        let game;
+        
+        function initGame() {
+            if (gameInitialized) return;
+            gameInitialized = true;
+            
+            // Calculate responsive dimensions
+            const maxWidth = Math.min(600, window.innerWidth - 20);
+            const maxHeight = Math.min(700, window.innerHeight - 20);
+            
+            // Game configuration
+            const config = {
+                type: Phaser.AUTO,
+                width: maxWidth,
+                height: maxHeight,
+                parent: 'game-container',
+                backgroundColor: '#ffffff',
+                scene: {
+                    create: create,
+                    update: update
+                },
+                scale: {
+                    mode: Phaser.Scale.FIT,
+                    autoCenter: Phaser.Scale.CENTER_BOTH
+                }
+            };
 
-        const game = new Phaser.Game(config);
+            game = new Phaser.Game(config);
         
         let cards = [];
         let flippedCards = [];
@@ -46,6 +168,7 @@
         let moves = 0;
         let canClick = true;
         let movesText, pairsText, titleText;
+        let startTime;
         
         // Card symbols (emojis work great!)
         const symbols = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊'];
@@ -54,28 +177,42 @@
         function create() {
             const scene = this;
             
+            // Track start time
+            startTime = Math.floor(Date.now() / 1000);
+            
+            // Get scene dimensions
+            const sceneWidth = scene.scale.width;
+            const sceneHeight = scene.scale.height;
+            
+            // Calculate responsive positions
+            const titleY = sceneHeight * 0.05;
+            const statsY = sceneHeight * 0.12;
+            const instructionsY = sceneHeight * 0.18;
+            const gridStartY = sceneHeight * 0.25;
+            
             // Title
-            titleText = scene.add.text(300, 30, 'Memory Match!', {
-                fontSize: '32px',
+            titleText = scene.add.text(sceneWidth / 2, titleY, 'Memory Match!', {
+                fontSize: Math.min(32, sceneWidth * 0.06) + 'px',
                 fontFamily: 'Arial',
                 color: '#FF6B35',
                 fontStyle: 'bold'
             }).setOrigin(0.5);
             
             // Score displays
-            movesText = scene.add.text(100, 80, 'Moves: 0', {
-                fontSize: '20px',
+            const fontSize = Math.min(20, sceneWidth * 0.035) + 'px';
+            movesText = scene.add.text(sceneWidth * 0.15, statsY, 'Moves: 0', {
+                fontSize: fontSize,
                 color: '#333'
             });
             
-            pairsText = scene.add.text(400, 80, 'Pairs: 0/' + totalPairs, {
-                fontSize: '20px',
+            pairsText = scene.add.text(sceneWidth * 0.65, statsY, 'Pairs: 0/' + totalPairs, {
+                fontSize: fontSize,
                 color: '#333'
             });
             
             // Instructions
-            scene.add.text(300, 120, 'Click cards to find matching pairs!', {
-                fontSize: '16px',
+            scene.add.text(sceneWidth / 2, instructionsY, 'Find matching pairs!', {
+                fontSize: Math.min(16, sceneWidth * 0.03) + 'px',
                 color: '#666'
             }).setOrigin(0.5);
             
@@ -88,19 +225,23 @@
             // Shuffle deck
             deck = Phaser.Utils.Array.Shuffle(deck);
             
-            // Create cards in grid (3 columns x 4 rows)
-            const startX = 100;
-            const startY = 170;
-            const cardWidth = 120;
-            const cardHeight = 140;
-            const spacingX = 150;
-            const spacingY = 170;
+            // Create cards in grid (3 columns x 4 rows) - responsive
+            const cols = 3;
+            const rows = 4;
+            const availableWidth = sceneWidth * 0.9;
+            const availableHeight = sceneHeight * 0.65;
+            
+            const cardWidth = Math.min(120, availableWidth / cols - 20);
+            const cardHeight = Math.min(140, availableHeight / rows - 20);
+            
+            const gridWidth = cols * (cardWidth + 20);
+            const startX = (sceneWidth - gridWidth) / 2 + cardWidth / 2 + 10;
             
             let index = 0;
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 3; col++) {
-                    const x = startX + col * spacingX;
-                    const y = startY + row * spacingY;
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const x = startX + col * (cardWidth + 20);
+                    const y = gridStartY + row * (cardHeight + 20);
                     const card = createCard(scene, x, y, cardWidth, cardHeight, deck[index], index);
                     cards.push(card);
                     index++;
@@ -117,7 +258,7 @@
             back.setStrokeStyle(3, 0x2E7D32);
             
             const questionMark = scene.add.text(0, 0, '?', {
-                fontSize: '64px',
+                fontSize: Math.min(64, width * 0.5) + 'px',
                 color: '#ffffff'
             }).setOrigin(0.5);
             
@@ -127,7 +268,7 @@
             front.setVisible(false);
             
             const symbolText = scene.add.text(0, 0, symbol, {
-                fontSize: '64px'
+                fontSize: Math.min(64, width * 0.5) + 'px'
             }).setOrigin(0.5);
             symbolText.setVisible(false);
             
@@ -241,13 +382,18 @@
             }
             
             // Show completion message
+            const scene = game.scene.scenes[0];
+            const sceneWidth = scene.scale.width;
+            const sceneHeight = scene.scale.height;
+            
             titleText.setText('🎉 You Won! 🎉');
-            titleText.setFontSize('40px');
+            titleText.setFontSize(Math.min(40, sceneWidth * 0.07) + 'px');
             
             // Add play again button
-            const playAgainBtn = game.scene.scenes[0].add.rectangle(300, 650, 200, 50, 0xFF6B35);
+            const btnY = sceneHeight * 0.85;
+            const playAgainBtn = scene.add.rectangle(sceneWidth / 2, btnY, 200, 50, 0xFF6B35);
             playAgainBtn.setInteractive();
-            const btnText = game.scene.scenes[0].add.text(300, 650, 'Play Again', {
+            const btnText = scene.add.text(sceneWidth / 2, btnY, 'Play Again', {
                 fontSize: '24px',
                 color: '#ffffff'
             }).setOrigin(0.5);
@@ -260,9 +406,7 @@
         function update() {
             // Game loop (not needed for this simple game)
         }
-        
-        // Track start time
-        const startTime = Math.floor(Date.now() / 1000);
+        }
     </script>
 </body>
 </html>
