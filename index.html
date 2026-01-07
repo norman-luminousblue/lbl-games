@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>LBL Activity Center</title>
     <style>
+        :root {
+            --primary-color: #00A8E8;
+            --secondary-color: #0077B6;
+            --accent-color: #06FFA5;
+            --success-color: #06FFA5;
+            --card-back-color: #457B9D;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -13,7 +21,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             width: 980px;
@@ -40,8 +48,93 @@
             text-align: center;
             color: #ffffff;
             font-size: 1.2em;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             opacity: 0.9;
+        }
+        
+        .theme-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .theme-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        
+        .theme-button.active {
+            background: white;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .progress-display {
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .level-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .points-display {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .progress-bar-outer {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            height: 25px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar-inner {
+            background: linear-gradient(90deg, #FFD700, var(--accent-color));
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.95em;
+            opacity: 0.95;
         }
         
         .games-grid {
@@ -132,10 +225,30 @@
 </head>
 <body>
     <div class="container">
-        <h1>🪼 Jellyfish Activity Center 🪼</h1>
-        <p class="subtitle">Dive into fun ocean adventures!</p>
+        <h1 id="mainTitle">🪼 Jellyfish Activity Center 🪼</h1>
+        <p class="subtitle">Dive into fun adventures!</p>
         
-        <div class="games-grid">
+        <div class="theme-selector">
+            <button class="theme-button active" onclick="switchTheme('jellyfish')">🪼 Jellyfish</button>
+            <button class="theme-button" onclick="switchTheme('monsters')">👾 Monsters</button>
+            <button class="theme-button" onclick="switchTheme('forest')">🦊 Forest</button>
+        </div>
+        
+        <div class="progress-display">
+            <div class="progress-header">
+                <div class="level-badge" id="levelBadge">Level 1</div>
+                <div class="points-display" id="pointsDisplay">0 points</div>
+            </div>
+            <div class="progress-bar-outer">
+                <div class="progress-bar-inner" id="progressBar" style="width: 0%">0%</div>
+            </div>
+            <div class="stats-row">
+                <div><strong id="totalCompleted">0</strong> activities completed</div>
+                <div><strong id="achievementsCount">0</strong> achievements unlocked</div>
+            </div>
+        </div>
+        
+        <div class="games-grid" id="gamesGrid">
             <div class="game-card" onclick="loadGame('memory-match.html', 'matching')">
                 <div class="game-icon">🪼</div>
                 <h2>Jellyfish Memory Match</h2>
@@ -186,14 +299,148 @@
         </div>
     </div>
     
+    <script src="js/themes.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/game-utils.js"></script>
     <script>
+        // Game configurations with difficulty levels
+        const games = [
+            {
+                file: 'memory-match.html',
+                type: 'matching',
+                icon: '🪼',
+                titles: { jellyfish: 'Jellyfish Memory Match', monsters: 'Monster Memory Match', forest: 'Forest Memory Match' },
+                description: 'Match the creatures! Find all the friends hiding in the cards.',
+                ageRange: 'Ages 5-8'
+            },
+            {
+                file: 'coloring-game.html',
+                type: 'coloring',
+                icon: '🎨',
+                titles: { jellyfish: 'Jellyfish Coloring', monsters: 'Monster Coloring', forest: 'Forest Coloring' },
+                description: 'Color the adventure! Bring your character to life with colors.',
+                ageRange: 'Ages 5-8'
+            },
+            {
+                file: 'maze-game.html',
+                type: 'maze',
+                icon: '🧭',
+                titles: { jellyfish: 'Ocean Maze Adventure', monsters: 'Monster Maze Adventure', forest: 'Forest Maze Adventure' },
+                description: 'Navigate through the maze to reach home!',
+                ageRange: 'Ages 5-8'
+            },
+            {
+                file: 'connect-dots.html',
+                type: 'connect-dots',
+                icon: '✏️',
+                titles: { jellyfish: 'Connect the Dots', monsters: 'Monster Connect', forest: 'Forest Connect' },
+                description: 'Connect the dots in order to reveal a hidden picture!',
+                ageRange: 'Ages 5-8'
+            },
+            {
+                file: 'spot-difference.html',
+                type: 'spot-difference',
+                icon: '🔍',
+                titles: { jellyfish: 'Spot the Difference', monsters: 'Spooky Differences', forest: 'Forest Differences' },
+                description: 'Find differences between two scenes!',
+                ageRange: 'Ages 5-8'
+            },
+            {
+                file: 'word-search.html',
+                type: 'word-search',
+                icon: '📝',
+                titles: { jellyfish: 'Ocean Word Search', monsters: 'Monster Word Search', forest: 'Forest Word Search' },
+                description: 'Find all the hidden words in the puzzle!',
+                ageRange: 'Ages 5-8'
+            }
+        ];
+        
+        let currentThemeName = 'jellyfish';
+        let currentTheme = getCurrentTheme();
+        
+        // Initialize page
+        function init() {
+            updateProgress();
+            renderGames();
+            applyTheme(currentTheme);
+            updateThemeButtons();
+        }
+        
+        function updateProgress() {
+            const progress = activityTracker.getProgress();
+            const levelProgress = progress.nextLevelProgress;
+            
+            document.getElementById('levelBadge').textContent = `Level ${progress.level}`;
+            document.getElementById('pointsDisplay').textContent = `${progress.totalPoints} points`;
+            document.getElementById('progressBar').style.width = `${levelProgress.percentage}%`;
+            document.getElementById('progressBar').textContent = `${Math.round(levelProgress.percentage)}%`;
+            document.getElementById('totalCompleted').textContent = progress.totalCompleted;
+            document.getElementById('achievementsCount').textContent = progress.achievements.length;
+        }
+        
+        function renderGames() {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '';
+            
+            games.forEach(game => {
+                const difficultyLevel = getDifficultyLevel(game.type);
+                const difficultyConfig = DIFFICULTY_LEVELS[game.type] ? DIFFICULTY_LEVELS[game.type][difficultyLevel - 1] : null;
+                const stars = '⭐'.repeat(difficultyLevel);
+                const difficultyName = difficultyConfig ? difficultyConfig.name : 'Easy';
+                
+                const title = game.titles[currentThemeName] || game.titles.jellyfish;
+                
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.onclick = () => loadGame(game.file, game.type);
+                card.innerHTML = `
+                    <div class="game-icon">${game.icon}</div>
+                    <h2>${title}</h2>
+                    <p>${game.description}</p>
+                    <span class="age-badge">${game.ageRange}</span>
+                    <span class="difficulty">${stars} ${difficultyName}</span>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+        
+        function switchTheme(themeName) {
+            setCurrentTheme(themeName);
+            currentThemeName = themeName;
+            currentTheme = getCurrentTheme();
+            
+            applyTheme(currentTheme);
+            updateThemeButtons();
+            renderGames();
+            
+            // Update title
+            const titles = {
+                jellyfish: '🪼 Jellyfish Activity Center 🪼',
+                monsters: '👾 Monster Activity Center 👾',
+                forest: '🦊 Forest Activity Center 🦊'
+            };
+            document.getElementById('mainTitle').textContent = titles[themeName];
+        }
+        
+        function updateThemeButtons() {
+            document.querySelectorAll('.theme-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[onclick="switchTheme('${currentThemeName}')"]`).classList.add('active');
+        }
+        
         function loadGame(gameFile, activityType) {
-            // Store activity type for when game completes
+            // Store activity type and theme for when game completes
             sessionStorage.setItem('currentActivityType', activityType);
+            sessionStorage.setItem('currentTheme', currentThemeName);
             
             // Navigate to the game
             window.location.href = gameFile;
         }
+        
+        // Initialize on load
+        init();
     </script>
 </body>
 </html>
