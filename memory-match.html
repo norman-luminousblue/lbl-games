@@ -570,6 +570,7 @@
             }).setOrigin(0.5);
             
             nextLevelBtn.on('pointerdown', () => {
+                sessionStorage.setItem('skipIntro', 'true');
                 location.reload();
             });
         }

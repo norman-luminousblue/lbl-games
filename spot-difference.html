@@ -243,7 +243,7 @@
             <h1>Amazing Detective Work!</h1>
             <p id="completion-time" style="font-size: 1.2em; color: #666; margin-bottom: 30px;"></p>
             <div class="controls">
-                <button class="btn btn-done" onclick="location.reload()">Next Level ⬆️</button>
+                <button class="btn btn-done" onclick="restartGame()">Next Level ⬆️</button>
                 <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
             </div>
         </div>
@@ -306,6 +306,13 @@
             document.getElementById('intro-screen').style.display = 'none';
             initGame();
         });
+        
+        // Auto-start if coming from Next Level button
+        if (sessionStorage.getItem('skipIntro') === 'true') {
+            sessionStorage.removeItem('skipIntro');
+            document.getElementById('intro-screen').style.display = 'none';
+            setTimeout(() => initGame(), 100);
+        }
         
         function initGame() {
             startTime = Date.now();
@@ -525,6 +532,12 @@
             document.getElementById('completion-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
             resetGame();
+        }
+        
+        function restartGame() {
+            // Set flag to skip intro on reload
+            sessionStorage.setItem('skipIntro', 'true');
+            location.reload();
         }
         
         function goBack() {

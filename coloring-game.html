@@ -269,7 +269,7 @@
             <h1>Amazing Work!</h1>
             <p style="font-size: 1.2em; color: #666; margin-bottom: 20px;">Your artwork is beautiful!</p>
             <div class="controls">
-                <button class="btn btn-done" onclick="location.reload()">Next Level ⬆️</button>
+                <button class="btn btn-done" onclick="restartGame()">Next Level ⬆️</button>
                 <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
             </div>
         </div>
@@ -435,6 +435,14 @@
             document.getElementById('game-screen').style.display = 'block';
             initGame();
         });
+        
+        // Auto-start if coming from Next Level button
+        if (sessionStorage.getItem('skipIntro') === 'true') {
+            sessionStorage.removeItem('skipIntro');
+            document.getElementById('intro-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            setTimeout(() => initGame(), 100);
+        }
         
         function initGame() {
             console.log('InitGame called - v2');
@@ -759,6 +767,12 @@
                     startBackgroundMusic();
                 }
             }
+        }
+        
+        function restartGame() {
+            // Set flag to skip intro on reload
+            sessionStorage.setItem('skipIntro', 'true');
+            location.reload();
         }
         
         function goBack() {
