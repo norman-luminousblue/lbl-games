@@ -271,6 +271,48 @@
         
         // Audio context for sound effects
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let musicGain = audioContext.createGain();
+        musicGain.connect(audioContext.destination);
+        musicGain.gain.value = 0.12;
+        let isMusicPlaying = false;
+        
+        // Background music - gentle, creative melody
+        function startBackgroundMusic() {
+            if (isMusicPlaying) return;
+            isMusicPlaying = true;
+            
+            const notes = [392.00, 440.00, 493.88, 523.25, 493.88, 440.00, 392.00]; // G4, A4, B4, C5, B4, A4, G4
+            const noteDuration = 0.4;
+            let noteIndex = 0;
+            
+            function playNextNote() {
+                if (!isMusicPlaying) return;
+                
+                const osc = audioContext.createOscillator();
+                const noteGain = audioContext.createGain();
+                
+                osc.connect(noteGain);
+                noteGain.connect(musicGain);
+                
+                osc.frequency.value = notes[noteIndex % notes.length];
+                osc.type = 'sine';
+                
+                noteGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+                noteGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + noteDuration);
+                
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + noteDuration);
+                
+                noteIndex++;
+                setTimeout(playNextNote, noteDuration * 1000);
+            }
+            
+            playNextNote();
+        }
+        
+        function stopBackgroundMusic() {
+            isMusicPlaying = false;
+        }
         
         // Function to play color selection sound
         function playColorSelectSound() {
@@ -370,6 +412,9 @@
             
             // Draw initial coloring page
             drawColoringPage();
+            
+            // Start background music
+            startBackgroundMusic();
         }
         
         function selectColor(color, btn) {

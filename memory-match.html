@@ -165,6 +165,48 @@
         
         // Audio context for sound effects
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let musicGain = audioContext.createGain();
+        musicGain.connect(audioContext.destination);
+        musicGain.gain.value = 0.15;
+        let isMusicPlaying = false;
+        
+        // Background music - upbeat melody
+        function startBackgroundMusic() {
+            if (isMusicPlaying) return;
+            isMusicPlaying = true;
+            
+            const notes = [523.25, 587.33, 659.25, 783.99, 659.25, 587.33]; // C5, D5, E5, G5, E5, D5
+            const noteDuration = 0.3;
+            let noteIndex = 0;
+            
+            function playNextNote() {
+                if (!isMusicPlaying) return;
+                
+                const osc = audioContext.createOscillator();
+                const noteGain = audioContext.createGain();
+                
+                osc.connect(noteGain);
+                noteGain.connect(musicGain);
+                
+                osc.frequency.value = notes[noteIndex % notes.length];
+                osc.type = 'triangle';
+                
+                noteGain.gain.setValueAtTime(0.5, audioContext.currentTime);
+                noteGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + noteDuration);
+                
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + noteDuration);
+                
+                noteIndex++;
+                setTimeout(playNextNote, noteDuration * 1000);
+            }
+            
+            playNextNote();
+        }
+        
+        function stopBackgroundMusic() {
+            isMusicPlaying = false;
+        }
         
         // Function to play click sound
         function playClickSound() {
@@ -193,6 +235,9 @@
             
             // Track start time
             startTime = Math.floor(Date.now() / 1000);
+            
+            // Start background music
+            startBackgroundMusic();
             
             // Get scene dimensions
             const sceneWidth = scene.scale.width;
