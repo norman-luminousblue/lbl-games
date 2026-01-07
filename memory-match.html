@@ -275,6 +275,32 @@
                 color: '#666'
             }).setOrigin(0.5);
             
+            // Back to Menu button (top left)
+            const menuBtnWidth = 120;
+            const menuBtnHeight = 35;
+            const menuBtnX = 80;
+            const menuBtnY = sceneHeight * 0.93;
+            
+            const menuBtn = scene.add.rectangle(menuBtnX, menuBtnY, menuBtnWidth, menuBtnHeight, 0x667eea);
+            menuBtn.setInteractive();
+            const menuText = scene.add.text(menuBtnX, menuBtnY, '← Menu', {
+                fontSize: '16px',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+            
+            menuBtn.on('pointerdown', () => {
+                stopBackgroundMusic();
+                window.location.href = 'index.html';
+            });
+            
+            menuBtn.on('pointerover', () => {
+                menuBtn.setFillStyle(0x7f8ef5);
+            });
+            
+            menuBtn.on('pointerout', () => {
+                menuBtn.setFillStyle(0x667eea);
+            });
+            
             // Create card deck (pairs)
             let deck = [];
             symbols.forEach(symbol => {
@@ -465,6 +491,7 @@
             }).setOrigin(0.5);
             
             backBtn.on('pointerdown', () => {
+                stopBackgroundMusic();
                 window.location.href = 'index.html';
             });
             
