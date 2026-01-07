@@ -250,6 +250,7 @@
             <div class="controls">
                 <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
                 <button class="btn btn-clear" onclick="clearCanvas()">Clear</button>
+                <button class="btn" id="sound-toggle" onclick="toggleSound()">🔊 Sound</button>
                 <button class="btn btn-done" onclick="completeColoring()">Done!</button>
             </div>
         </div>
@@ -675,7 +676,22 @@
             document.getElementById('completion-screen').style.display = 'block';
         }
         
+        function toggleSound() {
+            const soundBtn = document.getElementById('sound-toggle');
+            if (musicGain.gain.value > 0) {
+                musicGain.gain.value = 0;
+                soundBtn.textContent = '🔇 Sound';
+            } else {
+                musicGain.gain.value = 0.12;
+                soundBtn.textContent = '🔊 Sound';
+                if (!isMusicPlaying) {
+                    startBackgroundMusic();
+                }
+            }
+        }
+        
         function goBack() {
+            stopBackgroundMusic();
             window.location.href = 'index.html';
         }
     </script>

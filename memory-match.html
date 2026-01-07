@@ -301,6 +301,40 @@
                 menuBtn.setFillStyle(0x667eea);
             });
             
+            // Sound toggle button (top right)
+            const soundBtnX = sceneWidth - 80;
+            const soundBtnY = sceneHeight * 0.93;
+            let soundEnabled = true;
+            
+            const soundBtn = scene.add.rectangle(soundBtnX, soundBtnY, menuBtnWidth, menuBtnHeight, 0x764ba2);
+            soundBtn.setInteractive();
+            const soundText = scene.add.text(soundBtnX, soundBtnY, '🔊 Sound', {
+                fontSize: '16px',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+            
+            soundBtn.on('pointerdown', () => {
+                soundEnabled = !soundEnabled;
+                if (soundEnabled) {
+                    musicGain.gain.value = 0.15;
+                    soundText.setText('🔊 Sound');
+                    if (!isMusicPlaying) {
+                        startBackgroundMusic();
+                    }
+                } else {
+                    musicGain.gain.value = 0;
+                    soundText.setText('🔇 Sound');
+                }
+            });
+            
+            soundBtn.on('pointerover', () => {
+                soundBtn.setFillStyle(0x8b5fc0);
+            });
+            
+            soundBtn.on('pointerout', () => {
+                soundBtn.setFillStyle(0x764ba2);
+            });
+            
             // Create card deck (pairs)
             let deck = [];
             symbols.forEach(symbol => {
