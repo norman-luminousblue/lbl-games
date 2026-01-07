@@ -269,6 +269,27 @@
         let startTime;
         let coloredAreas = 0;
         
+        // Audio context for sound effects
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Function to play color selection sound
+        function playColorSelectSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 600;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.08);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.08);
+        }
+        
         const colors = [
             '#FF6B35', '#F7931E', '#FDC830', '#C1D82F', 
             '#00A8E8', '#0077B6', '#7209B7', '#F72585',
@@ -352,6 +373,9 @@
         }
         
         function selectColor(color, btn) {
+            // Play sound
+            playColorSelectSound();
+            
             // Remove selected class from all buttons
             document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
             
