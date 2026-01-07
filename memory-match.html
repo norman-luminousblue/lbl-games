@@ -163,6 +163,27 @@
         let movesText, pairsText, titleText;
         let startTime;
         
+        // Audio context for sound effects
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Function to play click sound
+        function playClickSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+        
         // Card symbols (emojis work great!)
         const symbols = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊'];
         const totalPairs = 6;
@@ -291,6 +312,9 @@
             if (!canClick) return;
             if (card.getData('isFlipped')) return;
             if (card.getData('isMatched')) return;
+            
+            // Play click sound
+            playClickSound();
             
             // Flip animation
             card.setData('isFlipped', true);
