@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spot the Difference - Jellyfish</title>
+    <script src="js/themes.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/game-utils.js"></script>
+    <style>
+        :root {
+            --primary-color: #00A8E8;
+            --secondary-color: #0077B6;
+            --accent-color: #06FFA5;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 980px;
+            height: 760px;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        #intro-screen h1 {
+            font-size: 3em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+        
+        #intro-screen .emoji {
+            font-size: 4em;
+            margin-bottom: 30px;
+        }
+        
+        #intro-screen p {
+            font-size: 1.2em;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        #start-button {
+            margin-top: 30px;
+            padding: 20px 60px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #0077B6;
+            background: #ffffff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+        }
+        
+        h1 {
+            color: #00A8E8;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        #instructions {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        #progress {
+            font-size: 1.3em;
+            color: #00A8E8;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .images-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .image-wrapper {
+            position: relative;
+        }
+        
+        .image-label {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        canvas {
+            border: 3px solid #00A8E8;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #E8F4F8;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-back {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-reset {
+            background: #F7931E;
+            color: white;
+        }
+        
+        #completion-screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        #completion-screen .emoji {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        #completion-screen h1 {
+            color: #00A8E8;
+            margin-bottom: 20px;
+        }
+        
+        .difference-marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #06FFA5;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: pulse 0.5s ease-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="intro-screen">
+        <div class="emoji">🔍</div>
+        <h1>Spot the Difference!</h1>
+        <p>Find all 5 differences between the two ocean scenes!</p>
+        <p>Click on the differences in either picture.</p>
+        <button id="start-button">Start Searching!</button>
+    </div>
+    
+    <div id="game-container">
+        <div id="game-screen">
+            <h1>🪼 Spot the Difference 🪼</h1>
+            <div id="instructions">Find 5 differences between the pictures!</div>
+            <div id="progress">Found: 0/5</div>
+            
+            <div class="images-container">
+                <div class="image-wrapper">
+                    <div class="image-label">Picture A</div>
+                    <canvas id="canvas1" width="400" height="350"></canvas>
+                </div>
+                <div class="image-wrapper">
+                    <div class="image-label">Picture B</div>
+                    <canvas id="canvas2" width="400" height="350"></canvas>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+                <button class="btn btn-reset" onclick="resetGame()">Reset</button>
+            </div>
+        </div>
+        
+        <div id="completion-screen">
+            <div class="emoji">🎉</div>
+            <h1>Amazing Detective Work!</h1>
+            <p id="completion-time" style="font-size: 1.2em; color: #666; margin-bottom: 30px;"></p>
+            <div class="controls">
+                <button class="btn btn-done" onclick="restartGame()">Next Level ⬆️</button>
+                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Load theme and apply
+        const currentTheme = getCurrentTheme();
+        const themeName = localStorage.getItem('currentTheme') || 'jellyfish';
+        const activityType = sessionStorage.getItem('currentActivityType') || 'spot-difference';
+        applyTheme(currentTheme);
+        
+        const canvas1 = document.getElementById('canvas1');
+        const canvas2 = document.getElementById('canvas2');
+        const ctx1 = canvas1.getContext('2d');
+        const ctx2 = canvas2.getContext('2d');
+        let startTime;
+        let foundDifferences = [];
+        
+        // Get difficulty level
+        const difficultyLevel = getDifficultyLevel(activityType);
+        const difficultyConfig = DIFFICULTY_LEVELS.difference[difficultyLevel - 1];
+        
+        // Differences: {x, y, radius, description} - different difficulty levels
+        const differenceSets = {
+            1: [ // EASY - 5 differences
+                {x: 100, y: 80, r: 25, desc: 'Star missing'},
+                {x: 300, y: 120, r: 30, desc: 'Fish color different'},
+                {x: 350, y: 250, r: 30, desc: 'Shell missing'},
+                {x: 150, y: 280, r: 25, desc: 'Seaweed shorter'},
+                {x: 250, y: 180, r: 35, desc: 'Jellyfish eye'}
+            ],
+            2: [ // MEDIUM - 7 differences
+                {x: 100, y: 80, r: 25, desc: 'Star missing'},
+                {x: 300, y: 120, r: 30, desc: 'Fish color different'},
+                {x: 350, y: 250, r: 30, desc: 'Shell missing'},
+                {x: 150, y: 280, r: 25, desc: 'Seaweed shorter'},
+                {x: 250, y: 180, r: 35, desc: 'Jellyfish eye'},
+                {x: 450, y: 100, r: 20, desc: 'Bubble size'},
+                {x: 500, y: 300, r: 25, desc: 'Coral shape'}
+            ],
+            3: [ // HARD - 10 differences
+                {x: 100, y: 80, r: 25, desc: 'Star missing'},
+                {x: 300, y: 120, r: 30, desc: 'Fish color different'},
+                {x: 350, y: 250, r: 30, desc: 'Shell missing'},
+                {x: 150, y: 280, r: 25, desc: 'Seaweed shorter'},
+                {x: 250, y: 180, r: 35, desc: 'Jellyfish eye'},
+                {x: 450, y: 100, r: 20, desc: 'Bubble size'},
+                {x: 500, y: 300, r: 25, desc: 'Coral shape'},
+                {x: 80, y: 300, r: 20, desc: 'Rock color'},
+                {x: 550, y: 200, r: 22, desc: 'Fish fin'},
+                {x: 200, y: 150, r: 28, desc: 'Wave pattern'}
+            ]
+        };
+        
+        const differences = differenceSets[difficultyLevel] || differenceSets[1];
+        const totalDifferences = differences.length;
+        
+        document.getElementById('start-button').addEventListener('click', function() {
+            document.getElementById('intro-screen').style.display = 'none';
+            initGame();
+        });
+        
+        // Auto-start if coming from Next Level button
+        if (sessionStorage.getItem('skipIntro') === 'true') {
+            sessionStorage.removeItem('skipIntro');
+            document.getElementById('intro-screen').style.display = 'none';
+            setTimeout(() => initGame(), 100);
+        }
+        
+        function initGame() {
+            startTime = Date.now();
+            foundDifferences = [];
+            drawScene(ctx1, true);
+            drawScene(ctx2, false);
+            setupControls();
+        }
+        
+        function drawScene(ctx, isOriginal) {
+            ctx.clearRect(0, 0, 400, 350);
+            
+            // Ocean background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+            gradient.addColorStop(0, '#A8DADC');
+            gradient.addColorStop(1, '#457B9D');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 400, 350);
+            
+            // Bubbles
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            [60, 180, 320].forEach((x, i) => {
+                ctx.beginPath();
+                ctx.arc(x, 50 + i * 30, 15, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Star (difference 1) - missing in picture 2
+            if (isOriginal || foundDifferences.includes(0)) {
+                ctx.fillStyle = '#F7931E';
+                drawStar(ctx, 100, 80, 5, 15, 7);
+            } else {
+                // Missing in picture 2
+            }
+            
+            // Small fish (difference 2) - color changes
+            ctx.fillStyle = (isOriginal || foundDifferences.includes(1)) ? '#FF6B35' : '#06FFA5';
+            ctx.beginPath();
+            ctx.ellipse(300, 120, 25, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Fish tail
+            ctx.beginPath();
+            ctx.moveTo(325, 120);
+            ctx.lineTo(340, 110);
+            ctx.lineTo(340, 130);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Jellyfish (center)
+            ctx.fillStyle = 'rgba(168, 218, 220, 0.8)';
+            ctx.beginPath();
+            ctx.arc(250, 180, 40, 0, Math.PI);
+            ctx.fill();
+            
+            // Jellyfish eyes
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(235, 170, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Second eye (difference 5) - missing in picture 2
+            if (isOriginal || foundDifferences.includes(4)) {
+                ctx.beginPath();
+                ctx.arc(265, 170, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Tentacles
+            ctx.strokeStyle = 'rgba(168, 218, 220, 0.8)';
+            ctx.lineWidth = 5;
+            [230, 250, 270].forEach(x => {
+                ctx.beginPath();
+                ctx.moveTo(x, 220);
+                ctx.lineTo(x - 10, 280);
+                ctx.stroke();
+            });
+            
+            // Seaweed (difference 4) - shorter in picture 2
+            ctx.fillStyle = '#2A9D8F';
+            const seaweedHeight = (isOriginal || foundDifferences.includes(3)) ? 100 : 60;
+            ctx.fillRect(145, 350 - seaweedHeight, 15, seaweedHeight);
+            
+            // Ocean floor
+            ctx.fillStyle = '#1D3557';
+            ctx.fillRect(0, 300, 400, 50);
+            
+            // Shell (difference 3) - missing in picture 2
+            if (isOriginal || foundDifferences.includes(2)) {
+                ctx.fillStyle = '#E9C46A';
+                ctx.beginPath();
+                ctx.arc(350, 250, 20, 0, Math.PI);
+                ctx.fill();
+                // Shell lines
+                ctx.strokeStyle = '#CA8A04';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(350 - 15 + i * 7.5, 250);
+                    ctx.lineTo(350 - 15 + i * 7.5, 235);
+                    ctx.stroke();
+                }
+            }
+            
+            // Rocks
+            ctx.fillStyle = '#6C757D';
+            [80, 200, 320].forEach((x, i) => {
+                ctx.beginPath();
+                ctx.arc(x, 320, 15 + i * 3, 0, Math.PI);
+                ctx.fill();
+            });
+        }
+        
+        function drawStar(ctx, x, y, points, outer, inner) {
+            ctx.beginPath();
+            for (let i = 0; i < points * 2; i++) {
+                const radius = i % 2 === 0 ? outer : inner;
+                const angle = (i * Math.PI) / points - Math.PI / 2;
+                const px = x + Math.cos(angle) * radius;
+                const py = y + Math.sin(angle) * radius;
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        function setupControls() {
+            canvas1.addEventListener('click', (e) => handleClick(e, canvas1));
+            canvas2.addEventListener('click', (e) => handleClick(e, canvas2));
+            canvas1.addEventListener('touchstart', (e) => handleTouch(e, canvas1));
+            canvas2.addEventListener('touchstart', (e) => handleTouch(e, canvas2));
+        }
+        
+        function handleClick(e, canvas) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            checkDifference(x, y);
+        }
+        
+        function handleTouch(e, canvas) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            checkDifference(x, y);
+        }
+        
+        function checkDifference(x, y) {
+            differences.forEach((diff, index) => {
+                if (foundDifferences.includes(index)) return;
+                
+                const distance = Math.sqrt((x - diff.x) ** 2 + (y - diff.y) ** 2);
+                if (distance < diff.r) {
+                    foundDifferences.push(index);
+                    markDifference(diff);
+                    updateProgress();
+                    
+                    if (foundDifferences.length === totalDifferences) {
+                        setTimeout(completeGame, 500);
+                    }
+                }
+            });
+        }
+        
+        function markDifference(diff) {
+            // Redraw both scenes with found differences
+            drawScene(ctx1, true);
+            drawScene(ctx2, false);
+            
+            // Mark found differences with circles
+            [ctx1, ctx2].forEach(ctx => {
+                ctx.strokeStyle = '#06FFA5';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(diff.x, diff.y, diff.r, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+        }
+        
+        function updateProgress() {
+            document.getElementById('progress').textContent = `Found: ${foundDifferences.length}/${totalDifferences}`;
+        }
+        
+        function completeGame() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('completion-screen').style.display = 'block';
+            document.getElementById('completion-time').textContent = `You found all differences in ${elapsed} seconds!`;
+            
+            // Send completion and track progress
+            const score = Math.max(100 - elapsed, 10);
+            const result = sendCompletionToWix(activityType, score, elapsed, themeName);
+            progressDifficulty(activityType);
+            
+            // Show achievements
+            if (result.newAchievements && result.newAchievements.length > 0) {
+                setTimeout(() => {
+                    result.newAchievements.forEach((achievement, index) => {
+                        setTimeout(() => showAchievement(achievement), index * 300);
+                    });
+                }, 500);
+            }
+        }
+        
+        function resetGame() {
+            foundDifferences = [];
+            drawScene(ctx1, true);
+            drawScene(ctx2, false);
+            updateProgress();
+            startTime = Date.now();
+        }
+        
+        function playAgain() {
+            document.getElementById('completion-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            resetGame();
+        }
+        
+        function restartGame() {
+            // Set flag to skip intro on reload
+            sessionStorage.setItem('skipIntro', 'true');
+            location.reload();
+        }
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
