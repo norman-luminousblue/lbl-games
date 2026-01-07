@@ -353,6 +353,49 @@ For each game:
 
 ---
 
+## 💡 FUTURE FEATURE IDEAS
+
+### Random Game Surprise Mode
+**Concept:** If user doesn't pick a game from home screen after X seconds (e.g., 5-10 seconds), automatically launch a random game as a "surprise challenge" with speed focus.
+
+**Benefits:**
+- Reduces decision fatigue
+- Adds surprise/excitement element
+- Encourages speed-running mindset
+- Keeps engagement high
+
+**Implementation Notes:**
+- Add countdown timer on main menu (optional visual)
+- After timeout, randomly select one of 6 games
+- Show special "Surprise Challenge!" intro screen
+- Track time prominently during gameplay
+- Maybe add "Beat Your Best Time" for that game
+- Optional: Add achievement for completing surprise challenges
+- Optional: Add leaderboard for fastest times per game
+
+**Technical Requirements:**
+- Timer on index.html (setTimeout)
+- Random game selector (Math.random() * 6)
+- Special URL parameter or sessionStorage flag for "surprise mode"
+- Track best times in localStorage
+- New achievement: "surprise_master" (complete 5 surprise challenges)
+
+**User Experience:**
+1. Land on main menu
+2. See "Choose your game or wait for a surprise!" message
+3. Optional countdown visual (5...4...3...2...1...)
+4. Game launches with "SURPRISE CHALLENGE!" screen
+5. "Beat it as fast as you can!" prompt
+6. After completion, show time + compare to personal best
+7. Return to menu with option to try again or wait for next surprise
+
+**Settings:**
+- Toggle surprise mode on/off
+- Adjust countdown duration (5s, 10s, 15s, off)
+- Choose if it's all 6 games or just favorites
+
+---
+
 ## 🎮 TESTING ORDER RECOMMENDATION
 
 1. **Start with Memory Match** (already was Phaser, should work perfectly)
