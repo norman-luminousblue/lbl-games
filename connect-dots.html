@@ -66,34 +66,34 @@
         console.log('LocalStorage key:', `difficulty_${difficultyKey}`);
         console.log('LocalStorage value:', localStorage.getItem(`difficulty_${difficultyKey}`));
         
-        // Dot sets for different difficulties
+        // Dot sets for different difficulties (adjusted positioning to avoid overlap)
         const dotSets = {
             1: [ // EASY - 15 dots (simple jellyfish)
-                {num: 1, x: 300, y: 100}, {num: 2, x: 360, y: 90}, {num: 3, x: 420, y: 110},
-                {num: 4, x: 450, y: 160}, {num: 5, x: 440, y: 220}, {num: 6, x: 380, y: 260},
-                {num: 7, x: 320, y: 270}, {num: 8, x: 260, y: 250}, {num: 9, x: 220, y: 200},
-                {num: 10, x: 230, y: 140}, {num: 11, x: 270, y: 110}, {num: 12, x: 300, y: 280},
-                {num: 13, x: 290, y: 350}, {num: 14, x: 370, y: 280}, {num: 15, x: 380, y: 360}
+                {num: 1, x: 300, y: 130}, {num: 2, x: 370, y: 115}, {num: 3, x: 440, y: 135},
+                {num: 4, x: 475, y: 185}, {num: 5, x: 465, y: 250}, {num: 6, x: 405, y: 295},
+                {num: 7, x: 335, y: 305}, {num: 8, x: 265, y: 285}, {num: 9, x: 215, y: 230},
+                {num: 10, x: 225, y: 165}, {num: 11, x: 280, y: 125}, {num: 12, x: 310, y: 315},
+                {num: 13, x: 305, y: 395}, {num: 14, x: 395, y: 315}, {num: 15, x: 400, y: 405}
             ],
-            2: [ // MEDIUM - 20 dots (original)
-                {num: 1, x: 280, y: 100}, {num: 2, x: 350, y: 80}, {num: 3, x: 420, y: 100},
-                {num: 4, x: 450, y: 140}, {num: 5, x: 460, y: 190}, {num: 6, x: 450, y: 240},
-                {num: 7, x: 400, y: 270}, {num: 8, x: 350, y: 280}, {num: 9, x: 300, y: 270},
-                {num: 10, x: 250, y: 240}, {num: 11, x: 240, y: 190}, {num: 12, x: 250, y: 140},
-                {num: 13, x: 280, y: 100}, {num: 14, x: 300, y: 280}, {num: 15, x: 290, y: 360},
-                {num: 16, x: 350, y: 280}, {num: 17, x: 350, y: 380}, {num: 18, x: 400, y: 280},
-                {num: 19, x: 410, y: 360}, {num: 20, x: 300, y: 100}
+            2: [ // MEDIUM - 20 dots (original with better spacing)
+                {num: 1, x: 280, y: 120}, {num: 2, x: 350, y: 100}, {num: 3, x: 420, y: 120},
+                {num: 4, x: 465, y: 160}, {num: 5, x: 485, y: 215}, {num: 6, x: 470, y: 270},
+                {num: 7, x: 420, y: 305}, {num: 8, x: 360, y: 320}, {num: 9, x: 300, y: 305},
+                {num: 10, x: 250, y: 270}, {num: 11, x: 235, y: 215}, {num: 12, x: 250, y: 160},
+                {num: 13, x: 280, y: 120}, {num: 14, x: 270, y: 320}, {num: 15, x: 265, y: 410},
+                {num: 16, x: 335, y: 320}, {num: 17, x: 335, y: 425}, {num: 18, x: 405, y: 320},
+                {num: 19, x: 415, y: 410}, {num: 20, x: 480, y: 320}
             ],
-            3: [ // HARD - 25 dots (detailed jellyfish)
-                {num: 1, x: 280, y: 100}, {num: 2, x: 320, y: 85}, {num: 3, x: 360, y: 80},
-                {num: 4, x: 400, y: 90}, {num: 5, x: 430, y: 115}, {num: 6, x: 455, y: 150},
-                {num: 7, x: 465, y: 195}, {num: 8, x: 460, y: 235}, {num: 9, x: 440, y: 265},
-                {num: 10, x: 405, y: 280}, {num: 11, x: 365, y: 288}, {num: 12, x: 325, y: 285},
-                {num: 13, x: 285, y: 275}, {num: 14, x: 250, y: 255}, {num: 15, x: 230, y: 220},
-                {num: 16, x: 225, y: 180}, {num: 17, x: 235, y: 140}, {num: 18, x: 260, y: 110},
-                {num: 19, x: 280, y: 100}, {num: 20, x: 285, y: 285}, {num: 21, x: 280, y: 360},
-                {num: 22, x: 340, y: 288}, {num: 23, x: 340, y: 380}, {num: 24, x: 395, y: 285},
-                {num: 25, x: 405, y: 365}
+            3: [ // HARD - 25 dots (detailed jellyfish with clear spacing)
+                {num: 1, x: 270, y: 110}, {num: 2, x: 315, y: 95}, {num: 3, x: 365, y: 90},
+                {num: 4, x: 415, y: 100}, {num: 5, x: 455, y: 130}, {num: 6, x: 485, y: 170},
+                {num: 7, x: 500, y: 220}, {num: 8, x: 495, y: 270}, {num: 9, x: 470, y: 310},
+                {num: 10, x: 425, y: 335}, {num: 11, x: 375, y: 345}, {num: 12, x: 325, y: 340},
+                {num: 13, x: 275, y: 325}, {num: 14, x: 235, y: 295}, {num: 15, x: 210, y: 250},
+                {num: 16, x: 205, y: 200}, {num: 17, x: 220, y: 150}, {num: 18, x: 250, y: 120},
+                {num: 19, x: 270, y: 110}, {num: 20, x: 260, y: 340}, {num: 21, x: 255, y: 430},
+                {num: 22, x: 340, y: 345}, {num: 23, x: 340, y: 445}, {num: 24, x: 420, y: 340},
+                {num: 25, x: 430, y: 430}
             ]
         };
         
