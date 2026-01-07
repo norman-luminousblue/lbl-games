@@ -4,8 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Memory Match Game</title>
+    <script src="js/themes.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/game-utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
     <style>
+        :root {
+            --primary-color: #00A8E8;
+            --secondary-color: #0077B6;
+            --accent-color: #06FFA5;
+            --success-color: #06FFA5;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -14,7 +23,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -127,6 +136,21 @@
     <div id="game-container"></div>
     
     <script>
+        // Load theme and difficulty
+        const currentTheme = getCurrentTheme();
+        const themeName = localStorage.getItem('currentTheme') || 'jellyfish';
+        const activityType = sessionStorage.getItem('currentActivityType') || 'matching';
+        const difficultyLevel = getDifficultyLevel(activityType);
+        const difficultyConfig = DIFFICULTY_LEVELS.memory[difficultyLevel - 1];
+        
+        // Apply theme
+        applyTheme(currentTheme);
+        
+        // Update intro screen with theme info
+        document.getElementById('intro-screen').style.background = currentTheme.colors.background;
+        const introEmoji = document.querySelector('#intro-screen .emoji');
+        if (introEmoji) introEmoji.textContent = currentTheme.emoji;
+        
         // Start game when button clicked
         document.getElementById('start-button').addEventListener('click', function() {
             document.getElementById('intro-screen').style.display = 'none';
@@ -227,8 +251,9 @@
         }
         
         // Card symbols (jellyfish and ocean creatures!)
-        const symbols = ['🪼', '🐙', '🦑', '🦀', '🐠', '🐡'];
-        const totalPairs = 6;
+        const themeCharacters = Object.values(currentTheme.characters);
+        const symbols = themeCharacters.slice(0, difficultyConfig.pairs);
+        const totalPairs = difficultyConfig.pairs;
 
         function create() {
             const scene = this;
@@ -488,19 +513,21 @@
             // Calculate score (fewer moves = better)
             const maxMoves = totalPairs * 4; // Maximum expected moves
             const score = Math.max(0, Math.round((1 - (moves / maxMoves)) * 100));
+            const timeSpent = Math.floor(Date.now() / 1000) - startTime;
             
-            // Send completion data to parent Wix page
-            const gameData = {
-                type: 'GAME_COMPLETE',
-                activityType: 'matching',
-                score: score,
-                moves: moves,
-                timeSpent: Math.floor(Date.now() / 1000) - startTime
-            };
+            // Send completion data and track progress
+            const result = sendCompletionToWix(activityType, score, timeSpent, themeName);
             
-            // Post message to parent window (Wix)
-            if (window.parent) {
-                window.parent.postMessage(gameData, '*');
+            // Progress to next difficulty
+            const nextLevel = progressDifficulty(activityType);
+            
+            // Show achievements
+            if (result.newAchievements && result.newAchievements.length > 0) {
+                setTimeout(() => {
+                    result.newAchievements.forEach((achievement, index) => {
+                        setTimeout(() => showAchievement(achievement), index * 300);
+                    });
+                }, 1000);
             }
             
             // Show completion message
@@ -508,8 +535,13 @@
             const sceneWidth = scene.scale.width;
             const sceneHeight = scene.scale.height;
             
+            const progress = activityTracker.getProgress();
             titleText.setText('🎉 You Won! 🎉');
             titleText.setFontSize(Math.min(40, sceneWidth * 0.07) + 'px');
+            
+            // Show score and stats
+            movesText.setText(`Score: ${score} | Moves: ${moves} | Time: ${timeSpent}s`);
+            pairsText.setText(`Level ${progress.level} | ${progress.totalPoints} points | +${score} pts`);
             
             // Add buttons
             const btnY = sceneHeight * 0.85;
