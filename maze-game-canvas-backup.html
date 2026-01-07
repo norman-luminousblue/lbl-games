@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jellyfish Maze Adventure</title>
+    <script src="js/themes.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/game-utils.js"></script>
+    <style>
+        :root {
+            --primary-color: #00A8E8;
+            --secondary-color: #0077B6;
+            --accent-color: #06FFA5;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 980px;
+            height: 760px;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        /* Intro Screen */
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        #intro-screen h1 {
+            font-size: 3em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+        
+        #intro-screen .emoji {
+            font-size: 4em;
+            margin-bottom: 30px;
+        }
+        
+        #intro-screen p {
+            font-size: 1.2em;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        #start-button {
+            margin-top: 30px;
+            padding: 20px 60px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #0077B6;
+            background: #ffffff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+        }
+        
+        h1 {
+            color: #00A8E8;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        #instructions {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        canvas {
+            border: 3px solid #00A8E8;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto 20px;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-back {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-reset {
+            background: #F7931E;
+            color: white;
+        }
+        
+        .btn-hint {
+            background: #06FFA5;
+            color: #333;
+        }
+        
+        #completion-screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        #completion-screen .emoji {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        #completion-screen h1 {
+            color: #00A8E8;
+            margin-bottom: 20px;
+        }
+        
+        #timer {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Intro Screen -->
+    <div id="intro-screen">
+        <div class="emoji">🪼</div>
+        <h1>Jellyfish Maze Adventure!</h1>
+        <p>Help the jellyfish swim through the ocean maze to reach home!</p>
+        <p>Draw with your mouse or finger to guide the way.</p>
+        <button id="start-button">Start Adventure!</button>
+    </div>
+    
+    <div id="game-container">
+        <div id="game-screen">
+            <h1>🪼 Maze Adventure 🪼</h1>
+            <div id="instructions">Draw a path for the jellyfish to reach the treasure!</div>
+            <div id="timer">Time: 0s</div>
+            
+            <canvas id="mazeCanvas" width="700" height="500"></canvas>
+            
+            <div class="controls">
+                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+                <button class="btn btn-reset" onclick="resetMaze()">Reset</button>
+                <button class="btn btn-hint" onclick="showHint()">💡 Hint</button>
+            </div>
+        </div>
+        
+        <!-- Completion Screen -->
+        <div id="completion-screen">
+            <div class="emoji">🎉</div>
+            <h1>You Did It!</h1>
+            <p id="completion-time" style="font-size: 1.2em; color: #666; margin-bottom: 30px;"></p>
+            <div class="controls">
+                <button class="btn btn-done" onclick="restartGame()">Next Level ⬆️</button>
+                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Load theme and apply
+        const currentTheme = getCurrentTheme();
+        const themeName = localStorage.getItem('currentTheme') || 'jellyfish';
+        const activityType = sessionStorage.getItem('currentActivityType') || 'maze';
+        applyTheme(currentTheme);
+        
+        const canvas = document.getElementById('mazeCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let startTime;
+        let timerInterval;
+        let currentPath = [];
+        let hintShown = false;
+        
+        // Get difficulty level
+        const difficultyLevel = getDifficultyLevel(activityType);
+        const difficultyConfig = DIFFICULTY_LEVELS.maze[difficultyLevel - 1];
+        
+        // Maze definitions - different sizes for difficulty
+        const mazeSets = {
+            1: { // EASY - 10x10 simple maze
+                maze: [
+                    [1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,1,0,0,0,0,1],
+                    [1,0,1,0,1,0,1,1,0,1],
+                    [1,0,1,0,0,0,1,0,0,1],
+                    [1,0,1,1,1,1,1,0,1,1],
+                    [1,0,0,0,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,0,1,1],
+                    [1,0,0,0,0,0,1,0,0,1],
+                    [1,0,1,1,1,0,1,1,0,1],
+                    [1,1,1,1,1,1,1,1,1,1]
+                ],
+                start: {x: 1, y: 1},
+                end: {x: 8, y: 8},
+                cellSize: 50
+            },
+            2: { // MEDIUM - 12x12 maze (original)
+                maze: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,1,0,0,0,0,0,0,1],
+                    [1,0,1,0,1,0,1,1,1,1,0,1],
+                    [1,0,1,0,0,0,1,0,0,1,0,1],
+                    [1,0,1,1,1,1,1,0,1,1,0,1],
+                    [1,0,0,0,0,0,0,0,1,0,0,1],
+                    [1,1,1,1,1,1,1,0,1,0,1,1],
+                    [1,0,0,0,0,0,1,0,0,0,0,1],
+                    [1,0,1,1,1,0,1,1,1,1,0,1],
+                    [1,0,0,0,1,0,0,0,0,1,0,1],
+                    [1,1,1,0,1,1,1,1,0,1,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                start: {x: 1, y: 1},
+                end: {x: 10, y: 10},
+                cellSize: 45
+            },
+            3: { // HARD - 15x15 complex maze
+                maze: [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+                    [1,0,1,0,1,0,1,1,1,0,1,0,1,0,1],
+                    [1,0,1,0,0,0,1,0,0,0,0,0,1,0,1],
+                    [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
+                    [1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+                    [1,1,1,1,1,1,1,0,1,0,1,1,1,1,1],
+                    [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1],
+                    [1,0,1,1,1,0,1,1,1,1,1,0,1,0,1],
+                    [1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+                    [1,0,1,0,1,1,1,1,1,1,1,1,1,0,1],
+                    [1,0,0,0,1,0,0,0,0,0,0,0,1,0,1],
+                    [1,1,1,0,1,0,1,1,1,1,1,0,1,0,1],
+                    [1,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                start: {x: 1, y: 1},
+                end: {x: 13, y: 13},
+                cellSize: 38
+            }
+        };
+        
+        const mazeConfig = mazeSets[difficultyLevel] || mazeSets[1];
+        const maze = mazeConfig.maze;
+        const cellSize = mazeConfig.cellSize;
+        const startPos = mazeConfig.start;
+        const endPos = mazeConfig.end;
+        
+        // Update canvas size based on maze
+        canvas.width = maze[0].length * cellSize;
+        canvas.height = maze.length * cellSize;
+        
+        document.getElementById('start-button').addEventListener('click', function() {
+            document.getElementById('intro-screen').style.display = 'none';
+            initGame();
+        });
+        
+        // Auto-start if coming from Next Level button
+        if (sessionStorage.getItem('skipIntro') === 'true') {
+            sessionStorage.removeItem('skipIntro');
+            document.getElementById('intro-screen').style.display = 'none';
+            setTimeout(() => initGame(), 100);
+        }
+        
+        function initGame() {
+            startTime = Date.now();
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+            drawMaze();
+            setupControls();
+        }
+        
+        function drawMaze() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw maze
+            for (let row = 0; row < maze.length; row++) {
+                for (let col = 0; col < maze[row].length; col++) {
+                    if (maze[row][col] === 1) {
+                        ctx.fillStyle = '#457B9D';
+                        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                        ctx.strokeStyle = '#1D3557';
+                        ctx.strokeRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                    } else {
+                        ctx.fillStyle = '#E8F4F8';
+                        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+            
+            // Draw start (jellyfish)
+            ctx.font = '35px Arial';
+            ctx.fillText('🪼', startPos.x * cellSize + 8, startPos.y * cellSize + 38);
+            
+            // Draw end (treasure/home)
+            ctx.fillText('🏠', endPos.x * cellSize + 8, endPos.y * cellSize + 38);
+            
+            // Redraw path if exists
+            if (currentPath.length > 0) {
+                ctx.strokeStyle = '#06FFA5';
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(currentPath[0].x, currentPath[0].y);
+                for (let i = 1; i < currentPath.length; i++) {
+                    ctx.lineTo(currentPath[i].x, currentPath[i].y);
+                }
+                ctx.stroke();
+            }
+        }
+        
+        function setupControls() {
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+            
+            canvas.addEventListener('touchstart', handleTouch);
+            canvas.addEventListener('touchmove', handleTouch);
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+        
+        function startDrawing(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check if starting near the start position
+            const startX = startPos.x * cellSize + cellSize / 2;
+            const startY = startPos.y * cellSize + cellSize / 2;
+            const dist = Math.sqrt((x - startX) ** 2 + (y - startY) ** 2);
+            
+            if (dist < cellSize) {
+                isDrawing = true;
+                currentPath = [{x: startX, y: startY}];
+            }
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check if in wall
+            const col = Math.floor(x / cellSize);
+            const row = Math.floor(y / cellSize);
+            
+            if (row >= 0 && row < maze.length && col >= 0 && col < maze[0].length) {
+                if (maze[row][col] === 1) {
+                    // Hit a wall - reset
+                    stopDrawing();
+                    resetPath();
+                    return;
+                }
+            }
+            
+            currentPath.push({x, y});
+            drawMaze();
+            
+            // Check if reached end
+            const endX = endPos.x * cellSize + cellSize / 2;
+            const endY = endPos.y * cellSize + cellSize / 2;
+            const distToEnd = Math.sqrt((x - endX) ** 2 + (y - endY) ** 2);
+            
+            if (distToEnd < cellSize / 2) {
+                completeMaze();
+            }
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 'mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+        
+        function resetPath() {
+            currentPath = [];
+            drawMaze();
+        }
+        
+        function resetMaze() {
+            resetPath();
+            hintShown = false;
+        }
+        
+        function showHint() {
+            if (hintShown) return;
+            hintShown = true;
+            
+            // Draw a faint path hint
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            
+            // Simple hint path (you can customize this)
+            const hintPath = [
+                {x: 1, y: 1}, {x: 3, y: 1}, {x: 3, y: 3}, {x: 5, y: 3},
+                {x: 5, y: 7}, {x: 7, y: 7}, {x: 7, y: 3}, {x: 11, y: 3},
+                {x: 11, y: 7}, {x: 12, y: 7}
+            ];
+            
+            ctx.beginPath();
+            ctx.moveTo(hintPath[0].x * cellSize + cellSize/2, hintPath[0].y * cellSize + cellSize/2);
+            for (let i = 1; i < hintPath.length; i++) {
+                ctx.lineTo(hintPath[i].x * cellSize + cellSize/2, hintPath[i].y * cellSize + cellSize/2);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            setTimeout(() => {
+                drawMaze();
+            }, 2000);
+        }
+        
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('timer').textContent = `Time: ${elapsed}s`;
+        }
+        
+        function completeMaze() {
+            clearInterval(timerInterval);
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('completion-screen').style.display = 'block';
+            document.getElementById('completion-time').textContent = `You completed the maze in ${elapsed} seconds!`;
+            
+            // Calculate score and send completion
+            const score = Math.max(100 - elapsed, 10);
+            const result = sendCompletionToWix(activityType, score, elapsed, themeName);
+            progressDifficulty(activityType);
+            
+            // Show achievements
+            if (result.newAchievements && result.newAchievements.length > 0) {
+                setTimeout(() => {
+                    result.newAchievements.forEach((achievement, index) => {
+                        setTimeout(() => showAchievement(achievement), index * 300);
+                    });
+                }, 1000);
+            }
+        }
+        
+        function playAgain() {
+            document.getElementById('completion-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            resetMaze();
+            initGame();
+        }
+        
+        function restartGame() {
+            // Set flag to skip intro on reload
+            sessionStorage.setItem('skipIntro', 'true');
+            location.reload();
+        }
+        
+        function goBack() {
+            clearInterval(timerInterval);
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
