@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Coloring Fun</title>
+    <script src="js/themes.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/game-utils.js"></script>
     <style>
+        :root {
+            --primary-color: #00A8E8;
+            --secondary-color: #0077B6;
+            --accent-color: #06FFA5;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -13,7 +21,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -265,6 +273,12 @@
     </div>
     
     <script>
+        // Load theme and apply
+        const currentTheme = getCurrentTheme();
+        const themeName = localStorage.getItem('currentTheme') || 'jellyfish';
+        const activityType = sessionStorage.getItem('currentActivityType') || 'coloring';
+        applyTheme(currentTheme);
+        
         let canvas, ctx;
         let currentColor = '#FF6B35';
         let startTime;
@@ -660,17 +674,19 @@
             const score = Math.round((coloredShapes / totalShapes) * 100);
             const timeSpent = Math.floor((Date.now() - startTime) / 1000);
             
-            // Send completion data to parent Wix page
-            const gameData = {
-                type: 'GAME_COMPLETE',
-                activityType: 'coloring',
-                score: score,
-                coloredAreas: coloredShapes,
-                timeSpent: timeSpent
-            };
+            // Send completion data and track progress
+            const result = sendCompletionToWix(activityType, score, timeSpent, themeName);
             
-            if (window.parent) {
-                window.parent.postMessage(gameData, '*');
+            // Progress difficulty (coloring doesn't have levels, but track anyway)
+            progressDifficulty(activityType);
+            
+            // Show achievements
+            if (result.newAchievements && result.newAchievements.length > 0) {
+                setTimeout(() => {
+                    result.newAchievements.forEach((achievement, index) => {
+                        setTimeout(() => showAchievement(achievement), index * 300);
+                    });
+                }, 1000);
             }
             
             // Show completion screen

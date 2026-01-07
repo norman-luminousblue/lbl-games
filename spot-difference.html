@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spot the Difference - Jellyfish</title>
+    <script src="js/themes.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/game-utils.js"></script>
     <style>
+        :root {
+            --primary-color: #00A8E8;
+            --secondary-color: #0077B6;
+            --accent-color: #06FFA5;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -13,7 +21,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -242,6 +250,12 @@
     </div>
     
     <script>
+        // Load theme and apply
+        const currentTheme = getCurrentTheme();
+        const themeName = localStorage.getItem('currentTheme') || 'jellyfish';
+        const activityType = sessionStorage.getItem('currentActivityType') || 'spot-difference';
+        applyTheme(currentTheme);
+        
         const canvas1 = document.getElementById('canvas1');
         const canvas2 = document.getElementById('canvas2');
         const ctx1 = canvas1.getContext('2d');
@@ -456,15 +470,18 @@
             document.getElementById('completion-screen').style.display = 'block';
             document.getElementById('completion-time').textContent = `You found all differences in ${elapsed} seconds!`;
             
-            // Send completion to Wix
-            if (window.parent) {
-                window.parent.postMessage({
-                    type: 'GAME_COMPLETE',
-                    activityType: 'spot-difference',
-                    score: Math.max(100 - elapsed, 10),
-                    timeSpent: elapsed,
-                    differencesFound: foundDifferences.length
-                }, '*');
+            // Send completion and track progress
+            const score = Math.max(100 - elapsed, 10);
+            const result = sendCompletionToWix(activityType, score, elapsed, themeName);
+            progressDifficulty(activityType);
+            
+            // Show achievements
+            if (result.newAchievements && result.newAchievements.length > 0) {
+                setTimeout(() => {
+                    result.newAchievements.forEach((achievement, index) => {
+                        setTimeout(() => showAchievement(achievement), index * 300);
+                    });
+                }, 500);
             }
         }
         
