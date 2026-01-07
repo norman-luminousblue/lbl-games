@@ -13,7 +13,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -224,10 +224,10 @@
 <body>
     <!-- Intro Screen -->
     <div id="intro-screen">
-        <div class="emoji">🎨</div>
-        <h1>Coloring Fun!</h1>
-        <p>Choose your colors and create beautiful artwork!</p>
-        <p>Tap or click on areas to fill them with color.</p>
+        <div class="emoji">🪼</div>
+        <h1>Jellyfish Coloring Adventure!</h1>
+        <p>Bring the underwater world to life with your favorite colors!</p>
+        <p>Color the jellyfish and its ocean friends.</p>
         <button id="start-button">Start Coloring</button>
     </div>
     
@@ -236,7 +236,7 @@
         <!-- Game Screen -->
         <div id="game-screen">
             <div class="header">
-                <h1>🎨 Coloring Fun</h1>
+                <h1>🪼 Jellyfish Coloring 🪼</h1>
             </div>
             
             <div class="color-palette" id="colorPalette">
@@ -340,25 +340,27 @@
             '#06FFA5', '#FFFFFF', '#000000', '#8B4513'
         ];
         
-        // Simple shapes to color - NO overlaps, well-separated for 600x400 canvas
+        // Jellyfish themed shapes - NO overlaps, well-separated for 600x400 canvas
         const shapes = [
-            // Sun (top left)
-            { type: 'circle', x: 100, y: 80, r: 50, color: null },
-            // Cloud parts (top right)
-            { type: 'circle', x: 480, y: 80, r: 45, color: null },
-            { type: 'circle', x: 540, y: 80, r: 35, color: null },
-            // House body (center-right)
-            { type: 'rect', x: 350, y: 220, w: 180, h: 130, color: null },
-            // Roof (triangle above house)
-            { type: 'triangle', x1: 330, y1: 220, x2: 440, y2: 140, x3: 550, y3: 220, color: null },
-            // Tree trunk (bottom left)
-            { type: 'rect', x: 70, y: 280, w: 30, h: 80, color: null },
-            // Tree leaves (above trunk)
-            { type: 'circle', x: 85, y: 250, r: 50, color: null },
-            // Flower 1 (bottom center-left)
-            { type: 'circle', x: 220, y: 320, r: 25, color: null },
-            // Flower 2 (bottom center)
-            { type: 'circle', x: 280, y: 340, r: 20, color: null }
+            // Jellyfish bell (main body)
+            { type: 'circle', x: 300, y: 120, r: 60, color: null },
+            // Jellyfish tentacles (3 wavy lines represented as rectangles)
+            { type: 'rect', x: 270, y: 180, w: 15, h: 120, color: null },
+            { type: 'rect', x: 295, y: 190, w: 15, h: 130, color: null },
+            { type: 'rect', x: 320, y: 185, w: 15, h: 125, color: null },
+            // Small fish friend
+            { type: 'circle', x: 100, y: 100, r: 30, color: null },
+            { type: 'triangle', x1: 130, y1: 100, x2: 160, y2: 90, x3: 160, y3: 110, color: null }, // fish tail
+            // Bubbles
+            { type: 'circle', x: 450, y: 80, r: 20, color: null },
+            { type: 'circle', x: 500, y: 120, r: 15, color: null },
+            { type: 'circle', x: 530, y: 90, r: 18, color: null },
+            // Seaweed
+            { type: 'rect', x: 50, y: 280, w: 20, h: 100, color: null },
+            { type: 'rect', x: 540, y: 250, w: 25, h: 130, color: null },
+            // Ocean floor elements
+            { type: 'circle', x: 200, y: 350, r: 25, color: null }, // shell
+            { type: 'circle', x: 400, y: 360, r: 20, color: null }  // coral
         ];
         
         document.getElementById('start-button').addEventListener('click', function() {
