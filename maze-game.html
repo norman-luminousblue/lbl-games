@@ -378,14 +378,18 @@
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
             startTime = null; // Stop timer
             
-            // Clear game
-            gameScene.scene.pause();
+            // Disable drawing
+            isDrawing = false;
+            gameScene.input.off('pointerdown');
+            gameScene.input.off('pointermove');
+            gameScene.input.off('pointerup');
             
             // Show completion screen
             const overlay = gameScene.add.graphics();
             overlay.fillStyle(0x00A8E8, 0.95);
             overlay.fillRect(0, 0, gameWidth, gameHeight);
             overlay.setDepth(200);
+            overlay.setInteractive(new Phaser.Geom.Rectangle(0, 0, gameWidth, gameHeight), Phaser.Geom.Rectangle.Contains);
             
             const successText = gameScene.add.text(gameWidth / 2, gameHeight / 2 - 100, '🎉 Amazing! 🎉', {
                 fontSize: '48px',
@@ -427,7 +431,7 @@
                 }, 1000);
             }
             
-            // Next Level button
+            // Next Level button with graphics as background
             const nextButton = gameScene.add.graphics();
             nextButton.fillStyle(0x06FFA5, 1);
             nextButton.fillRoundedRect(gameWidth / 2 - 100, gameHeight / 2 + 60, 200, 60, 10);
@@ -440,12 +444,10 @@
                 fontStyle: 'bold'
             });
             nextText.setOrigin(0.5);
-            nextText.setDepth(201);
-            
-            const nextZone = gameScene.add.zone(gameWidth / 2, gameHeight / 2 + 90, 200, 60);
-            nextZone.setInteractive({ useHandCursor: true });
-            nextZone.setDepth(201);
-            nextZone.on('pointerdown', () => {
+            nextText.setDepth(202);
+            nextText.setInteractive({ useHandCursor: true });
+            nextText.on('pointerdown', () => {
+                console.log('Next Level clicked');
                 sessionStorage.setItem('skipIntro', 'true');
                 location.reload();
             });
@@ -457,9 +459,10 @@
                 color: '#ffffff'
             });
             backText.setOrigin(0.5);
-            backText.setDepth(201);
+            backText.setDepth(202);
             backText.setInteractive({ useHandCursor: true });
             backText.on('pointerdown', () => {
+                console.log('Back to Menu clicked');
                 window.location.href = 'index.html';
             });
         }
