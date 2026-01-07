@@ -677,8 +677,8 @@
             // Send completion data and track progress
             const result = sendCompletionToWix(activityType, score, timeSpent, themeName);
             
-            // Progress difficulty (coloring doesn't have levels, but track anyway)
-            progressDifficulty(activityType);
+            // Note: Coloring doesn't have progressive difficulty - same image each time
+            // Just track completion for achievements
             
             // Show achievements
             if (result.newAchievements && result.newAchievements.length > 0) {

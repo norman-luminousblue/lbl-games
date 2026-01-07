@@ -51,9 +51,14 @@ function sendCompletionToWix(activityType, score, timeSpent, theme) {
     // Get COPPA-compliant data
     const wixData = activityTracker.getWixData(activityType, score, timeSpent);
     
-    // Send to parent window (Wix)
-    if (window.parent !== window) {
-        window.parent.postMessage(wixData, '*');
+    // Send to parent window (Wix) - only if we're in an iframe
+    try {
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage(wixData, '*');
+        }
+    } catch (error) {
+        // Silently fail if postMessage is blocked or window is closing
+        console.log('Note: Running standalone, data saved locally only');
     }
     
     return result;
