@@ -415,12 +415,22 @@
             const result = sendCompletionToWix(activityType, score, elapsed, themeName);
             
             console.log('🎯 Completion result:', result);
+            console.log('📊 Current difficulty before progression:', difficultyLevel);
             
             // Progress difficulty using difficultyKey
+            const oldDiff = getDifficultyLevel(difficultyKey);
             progressDifficulty(difficultyKey);
+            const newDiff = getDifficultyLevel(difficultyKey);
             
-            const currentDiff = getDifficultyLevel(difficultyKey);
-            console.log('📈 New difficulty after progression:', currentDiff);
+            console.log('📈 Difficulty progression:', oldDiff, '→', newDiff);
+            console.log('🔑 Difficulty key:', difficultyKey);
+            console.log('💾 localStorage key:', `difficulty_${difficultyKey}`);
+            
+            // Check if we've reached max difficulty
+            const maxDifficulty = DIFFICULTY_LEVELS[difficultyKey].length;
+            const hasMoreLevels = newDiff < maxDifficulty;
+            
+            console.log('🎯 Max difficulty:', maxDifficulty, '| Has more levels:', hasMoreLevels);
             
             // Show achievements
             if (result.newAchievements && result.newAchievements.length > 0) {
@@ -431,26 +441,38 @@
                 }, 1000);
             }
             
-            // Next Level button with graphics as background
-            const nextButton = gameScene.add.graphics();
-            nextButton.fillStyle(0x06FFA5, 1);
-            nextButton.fillRoundedRect(gameWidth / 2 - 100, gameHeight / 2 + 60, 200, 60, 10);
-            nextButton.setDepth(201);
-            
-            const nextText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 90, 'Next Level', {
-                fontSize: '28px',
-                fontFamily: 'Arial',
-                color: '#1D3557',
-                fontStyle: 'bold'
-            });
-            nextText.setOrigin(0.5);
-            nextText.setDepth(202);
-            nextText.setInteractive({ useHandCursor: true });
-            nextText.on('pointerdown', () => {
-                console.log('Next Level clicked');
-                sessionStorage.setItem('skipIntro', 'true');
-                location.reload();
-            });
+            // Next Level button (only if there are more levels)
+            if (hasMoreLevels) {
+                const nextButton = gameScene.add.graphics();
+                nextButton.fillStyle(0x06FFA5, 1);
+                nextButton.fillRoundedRect(gameWidth / 2 - 100, gameHeight / 2 + 60, 200, 60, 10);
+                nextButton.setDepth(201);
+                
+                const nextText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 90, 'Next Level', {
+                    fontSize: '28px',
+                    fontFamily: 'Arial',
+                    color: '#1D3557',
+                    fontStyle: 'bold'
+                });
+                nextText.setOrigin(0.5);
+                nextText.setDepth(202);
+                nextText.setInteractive({ useHandCursor: true });
+                nextText.on('pointerdown', () => {
+                    console.log('Next Level clicked - reloading with difficulty:', newDiff);
+                    sessionStorage.setItem('skipIntro', 'true');
+                    location.reload();
+                });
+            } else {
+                // Show "All Levels Complete" message
+                const completeText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 90, '🏆 All Levels Complete! 🏆', {
+                    fontSize: '24px',
+                    fontFamily: 'Arial',
+                    color: '#06FFA5',
+                    fontStyle: 'bold'
+                });
+                completeText.setOrigin(0.5);
+                completeText.setDepth(202);
+            }
             
             // Back to menu button
             const backText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 160, '← Back to Menu', {
