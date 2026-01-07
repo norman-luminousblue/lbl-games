@@ -3,305 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ocean Word Search</title>
+    <title>Word Search - Find Ocean Words!</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
     <script src="js/themes.js"></script>
     <script src="js/rewards.js"></script>
     <script src="js/game-utils.js"></script>
     <style>
-        :root {
-            --primary-color: #00A8E8;
-            --secondary-color: #0077B6;
-            --accent-color: #06FFA5;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 980px;
-            height: 760px;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
+            min-height: 100vh;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
         }
-        
         #game-container {
-            width: 100%;
-            height: 100%;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
             text-align: center;
-            position: relative;
-        }
-        
-        #intro-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        
-        #intro-screen h1 {
-            font-size: 3em;
-            color: #ffffff;
-            margin-bottom: 20px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
-        }
-        
-        #intro-screen .emoji {
-            font-size: 4em;
-            margin-bottom: 30px;
-        }
-        
-        #intro-screen p {
-            font-size: 1.2em;
-            color: #ffffff;
-            margin-bottom: 15px;
-            text-align: center;
-            max-width: 500px;
-        }
-        
-        #start-button {
-            margin-top: 30px;
-            padding: 20px 60px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #0077B6;
-            background: #ffffff;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-        }
-        
-        #start-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
-        }
-        
-        h1 {
-            color: #00A8E8;
-            margin-bottom: 10px;
-            font-size: 2em;
-        }
-        
-        #instructions {
-            color: #666;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-        
-        .game-content {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            align-items: flex-start;
-        }
-        
-        canvas {
-            border: 3px solid #00A8E8;
-            border-radius: 10px;
-            cursor: pointer;
-            background: white;
-        }
-        
-        .word-list {
-            text-align: left;
-            padding: 20px;
-            background: #E8F4F8;
-            border-radius: 10px;
-            border: 3px solid #00A8E8;
-        }
-        
-        .word-list h3 {
-            color: #00A8E8;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-        
-        .word-item {
-            font-size: 1.1em;
-            margin: 10px 0;
-            padding: 8px 12px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .word-item.found {
-            background: #06FFA5;
-            color: white;
-            text-decoration: line-through;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .btn {
-            padding: 12px 30px;
-            font-size: 1.1em;
-            font-weight: bold;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-        
-        .btn-back {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-reset {
-            background: #F7931E;
-            color: white;
-        }
-        
-        #completion-screen {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-        
-        #completion-screen .emoji {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
-        
-        #completion-screen h1 {
-            color: #00A8E8;
-            margin-bottom: 20px;
-        }
-        
-        #progress {
-            font-size: 1.2em;
-            color: #00A8E8;
-            margin-bottom: 15px;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div id="intro-screen">
-        <div class="emoji">📝</div>
-        <h1>Ocean Word Search!</h1>
-        <p>Find all the hidden ocean words in the puzzle!</p>
-        <p>Click and drag to select words (horizontal, vertical, or diagonal).</p>
-        <button id="start-button">Start Searching!</button>
-    </div>
-    
-    <div id="game-container">
-        <div id="game-screen">
-            <h1>🪼 Ocean Word Search 🪼</h1>
-            <div id="instructions">Find all the ocean words!</div>
-            <div id="progress">Found: 0/8</div>
-            
-            <div class="game-content">
-                <canvas id="puzzleCanvas" width="500" height="500"></canvas>
-                
-                <div class="word-list">
-                    <h3>Find These Words:</h3>
-                    <div id="wordList"></div>
-                </div>
-            </div>
-            
-            <div class="controls">
-                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
-                <button class="btn btn-reset" onclick="resetGame()">Reset</button>
-            </div>
-        </div>
-        
-        <div id="completion-screen">
-            <div class="emoji">🎉</div>
-            <h1>Word Master!</h1>
-            <p id="completion-time" style="font-size: 1.2em; color: #666; margin-bottom: 30px;"></p>
-            <div class="controls">
-                <button class="btn btn-done" onclick="restartGame()">Next Level ⬆️</button>
-                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
-            </div>
-        </div>
-    </div>
+    <div id="game-container"></div>
     
     <script>
-        // Load theme and apply
+        console.log('🎮 WORD SEARCH PHASER VERSION LOADED');
+        
+        // Activity configuration
+        const activityType = 'word-search';
+        const difficultyKey = 'wordSearch';
+        
+        // Load theme
         const currentTheme = getCurrentTheme();
         const themeName = localStorage.getItem('currentTheme') || 'jellyfish';
-        const activityType = sessionStorage.getItem('currentActivityType') || 'word-search';
         applyTheme(currentTheme);
         
-        const canvas = document.getElementById('puzzleCanvas');
-        const ctx = canvas.getContext('2d');
-        
         // Get difficulty level
-        const difficultyLevel = getDifficultyLevel(activityType);
-        const difficultyConfig = DIFFICULTY_LEVELS.wordSearch[difficultyLevel - 1];
+        const difficultyLevel = getDifficultyLevel(difficultyKey);
+        const difficultyConfig = DIFFICULTY_LEVELS[difficultyKey][difficultyLevel - 1];
+        
+        console.log('📊 Difficulty Level:', difficultyLevel);
+        console.log('📋 Config:', difficultyConfig);
         
         const gridSize = difficultyConfig.gridSize;
-        const cellSize = Math.floor(500 / gridSize); // Adjust cell size based on grid
+        const cellSize = 40;
+        const gridWidth = gridSize * cellSize;
+        const gameWidth = gridWidth + 300; // Extra space for word list
+        const gameHeight = gridWidth + 150;
+        
+        let gameScene;
         let grid = [];
+        let words = [];
+        let wordPositions = [];
+        let foundWords = [];
+        let startTime;
+        let selectionGraphics;
         let isSelecting = false;
         let startCell = null;
         let currentCell = null;
-        let foundWords = [];
-        let startTime;
+        let wordTexts = {};
         
-        // Theme-based words, limited by difficulty
+        // Theme words
         const themeWords = currentTheme.words || [
             'JELLYFISH', 'OCEAN', 'CORAL', 'WAVE', 'SHELL', 'FISH', 'CRAB', 'STAR',
-            'WATER', 'BLUE', 'SEA', 'TIDE'
+            'WATER', 'BLUE', 'SEA', 'TIDE', 'REEF', 'SAND'
         ];
         
-        const words = themeWords.slice(0, difficultyConfig.words);
+        words = themeWords.slice(0, difficultyConfig.words);
         
-        const wordPositions = [];
+        // Phaser configuration
+        const config = {
+            type: Phaser.AUTO,
+            width: gameWidth,
+            height: gameHeight,
+            parent: 'game-container',
+            backgroundColor: '#E8F4F8',
+            scene: {
+                create: create,
+                update: update
+            }
+        };
         
-        document.getElementById('start-button').addEventListener('click', function() {
-            document.getElementById('intro-screen').style.display = 'none';
-            initGame();
-        });
+        const game = new Phaser.Game(config);
         
-        // Auto-start if coming from Next Level button
-        if (sessionStorage.getItem('skipIntro') === 'true') {
-            sessionStorage.removeItem('skipIntro');
-            document.getElementById('intro-screen').style.display = 'none';
-            setTimeout(() => initGame(), 100);
+        function create() {
+            gameScene = this;
+            
+            // Check if we should skip intro
+            if (sessionStorage.getItem('skipIntro') === 'true') {
+                sessionStorage.removeItem('skipIntro');
+                startGame();
+            } else {
+                showIntro();
+            }
         }
         
-        function initGame() {
+        function showIntro() {
+            // Background
+            const bg = gameScene.add.graphics();
+            bg.fillStyle(0x00A8E8, 1);
+            bg.fillRect(0, 0, gameWidth, gameHeight);
+            
+            // Title
+            const titleText = gameScene.add.text(gameWidth / 2, 100, 'Word Search!', {
+                fontSize: '52px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            });
+            titleText.setOrigin(0.5);
+            
+            // Emoji
+            const emoji = gameScene.add.text(gameWidth / 2, 180, '🔤🪼', {
+                fontSize: '72px'
+            });
+            emoji.setOrigin(0.5);
+            
+            // Instructions
+            const difficultyText = difficultyConfig.name || 'Easy';
+            const instructions = gameScene.add.text(gameWidth / 2, gameHeight / 2, 
+                `Level: ${difficultyText} (${gridSize}x${gridSize} grid)\n\nFind ${words.length} ocean words!\n\nDrag from start to end of each word\n(horizontal, vertical, or diagonal)`, {
+                fontSize: '22px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                align: 'center',
+                lineSpacing: 10
+            });
+            instructions.setOrigin(0.5);
+            
+            // Start button
+            const button = gameScene.add.graphics();
+            button.fillStyle(0x06FFA5, 1);
+            button.fillRoundedRect(gameWidth / 2 - 100, gameHeight / 2 + 120, 200, 60, 10);
+            
+            const buttonText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 150, 'Start Game', {
+                fontSize: '28px',
+                fontFamily: 'Arial',
+                color: '#1D3557',
+                fontStyle: 'bold'
+            });
+            buttonText.setOrigin(0.5);
+            
+            // Make button interactive
+            const buttonZone = gameScene.add.zone(gameWidth / 2, gameHeight / 2 + 150, 200, 60);
+            buttonZone.setInteractive({ useHandCursor: true });
+            buttonZone.on('pointerdown', () => {
+                bg.destroy();
+                titleText.destroy();
+                emoji.destroy();
+                instructions.destroy();
+                button.destroy();
+                buttonText.destroy();
+                buttonZone.destroy();
+                startGame();
+            });
+            
+            // Back button
+            const backButton = gameScene.add.text(20, 20, '← Back', {
+                fontSize: '24px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            });
+            backButton.setInteractive({ useHandCursor: true });
+            backButton.on('pointerdown', () => {
+                window.location.href = 'index.html';
+            });
+        }
+        
+        function startGame() {
             startTime = Date.now();
             foundWords = [];
+            wordTexts = {};
+            
+            // Title
+            const title = gameScene.add.text(gameWidth / 2, 25, '🔤 Find All the Words! 🔤', {
+                fontSize: '28px',
+                fontFamily: 'Arial',
+                color: '#1D3557',
+                fontStyle: 'bold'
+            });
+            title.setOrigin(0.5);
+            title.setDepth(100);
+            
+            // Progress text
+            const progressText = gameScene.add.text(gameWidth / 2, 60, `Found: 0/${words.length}`, {
+                fontSize: '24px',
+                fontFamily: 'Arial',
+                color: '#00A8E8',
+                fontStyle: 'bold'
+            });
+            progressText.setOrigin(0.5);
+            progressText.setDepth(100);
+            progressText.name = 'progressText';
+            
+            // Generate grid
             createGrid();
             placeWords();
             fillRandomLetters();
+            
+            // Draw grid
             drawGrid();
-            createWordList();
-            setupControls();
+            
+            // Draw word list
+            drawWordList();
+            
+            // Create selection graphics
+            selectionGraphics = gameScene.add.graphics();
+            selectionGraphics.setDepth(50);
+            
+            // Setup input
+            setupInput();
         }
         
         function createGrid() {
@@ -315,15 +226,14 @@
         }
         
         function placeWords() {
-            wordPositions.length = 0;
+            wordPositions = [];
             
-            // Place each word
             words.forEach(word => {
                 let placed = false;
                 let attempts = 0;
                 
                 while (!placed && attempts < 100) {
-                    const direction = Math.floor(Math.random() * 3); // 0: horizontal, 1: vertical, 2: diagonal
+                    const direction = Math.floor(Math.random() * 3);
                     const row = Math.floor(Math.random() * gridSize);
                     const col = Math.floor(Math.random() * gridSize);
                     
@@ -390,145 +300,167 @@
         }
         
         function drawGrid() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const offsetX = 50;
+            const offsetY = 100;
             
-            // Draw cells
             for (let i = 0; i < gridSize; i++) {
                 for (let j = 0; j < gridSize; j++) {
-                    const x = j * cellSize;
-                    const y = i * cellSize;
+                    const x = offsetX + j * cellSize;
+                    const y = offsetY + i * cellSize;
                     
-                    // Check if this cell is part of a found word
-                    const isFound = isInFoundWord(i, j);
+                    // Cell background
+                    const cell = gameScene.add.graphics();
+                    cell.fillStyle(0xE8F4F8, 1);
+                    cell.fillRect(x, y, cellSize, cellSize);
+                    cell.lineStyle(1, 0x00A8E8, 1);
+                    cell.strokeRect(x, y, cellSize, cellSize);
+                    cell.name = `cell_${i}_${j}`;
                     
-                    ctx.fillStyle = isFound ? '#06FFA5' : '#E8F4F8';
-                    ctx.fillRect(x, y, cellSize, cellSize);
+                    // Letter
+                    const letter = gameScene.add.text(x + cellSize / 2, y + cellSize / 2, grid[i][j], {
+                        fontSize: '20px',
+                        fontFamily: 'Arial',
+                        color: '#333333',
+                        fontStyle: 'bold'
+                    });
+                    letter.setOrigin(0.5);
+                    letter.name = `letter_${i}_${j}`;
                     
-                    ctx.strokeStyle = '#00A8E8';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(x, y, cellSize, cellSize);
-                    
-                    // Draw letter
-                    ctx.fillStyle = '#333';
-                    ctx.font = 'bold 24px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(grid[i][j], x + cellSize / 2, y + cellSize / 2);
+                    // Interactive zone
+                    const zone = gameScene.add.zone(x + cellSize / 2, y + cellSize / 2, cellSize, cellSize);
+                    zone.setInteractive({ useHandCursor: true });
+                    zone.row = i;
+                    zone.col = j;
                 }
             }
+        }
+        
+        function drawWordList() {
+            const listX = gridWidth + 80;
+            const listY = 120;
             
-            // Draw current selection
-            if (isSelecting && startCell && currentCell) {
-                ctx.strokeStyle = 'rgba(247, 147, 30, 0.5)';
-                ctx.lineWidth = 4;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(
-                    startCell.col * cellSize + cellSize / 2,
-                    startCell.row * cellSize + cellSize / 2
-                );
-                ctx.lineTo(
-                    currentCell.col * cellSize + cellSize / 2,
-                    currentCell.row * cellSize + cellSize / 2
-                );
-                ctx.stroke();
+            // Background
+            const bg = gameScene.add.graphics();
+            bg.fillStyle(0xE8F4F8, 1);
+            bg.fillRoundedRect(listX - 20, listY - 30, 220, 50 + words.length * 35, 10);
+            bg.lineStyle(3, 0x00A8E8, 1);
+            bg.strokeRoundedRect(listX - 20, listY - 30, 220, 50 + words.length * 35, 10);
+            bg.setDepth(10);
+            
+            // Title
+            const titleText = gameScene.add.text(listX + 90, listY, 'Words to Find', {
+                fontSize: '20px',
+                fontFamily: 'Arial',
+                color: '#00A8E8',
+                fontStyle: 'bold'
+            });
+            titleText.setOrigin(0.5);
+            titleText.setDepth(11);
+            
+            // Word list
+            words.forEach((word, index) => {
+                const wordText = gameScene.add.text(listX, listY + 40 + index * 35, word, {
+                    fontSize: '18px',
+                    fontFamily: 'Arial',
+                    color: '#333333'
+                });
+                wordText.setDepth(11);
+                wordTexts[word] = wordText;
+            });
+        }
+        
+        function setupInput() {
+            gameScene.input.on('pointerdown', (pointer) => {
+                const cell = getCellFromPointer(pointer);
+                if (cell) {
+                    isSelecting = true;
+                    startCell = cell;
+                    currentCell = cell;
+                }
+            });
+            
+            gameScene.input.on('pointermove', (pointer) => {
+                if (isSelecting) {
+                    const cell = getCellFromPointer(pointer);
+                    if (cell) {
+                        currentCell = cell;
+                        drawSelection();
+                    }
+                }
+            });
+            
+            gameScene.input.on('pointerup', () => {
+                if (isSelecting) {
+                    isSelecting = false;
+                    checkSelection();
+                    startCell = null;
+                    currentCell = null;
+                    selectionGraphics.clear();
+                }
+            });
+        }
+        
+        function getCellFromPointer(pointer) {
+            const offsetX = 50;
+            const offsetY = 100;
+            
+            if (pointer.x < offsetX || pointer.x > offsetX + gridWidth ||
+                pointer.y < offsetY || pointer.y > offsetY + gridWidth) {
+                return null;
             }
-        }
-        
-        function isInFoundWord(row, col) {
-            return foundWords.some(wordData => {
-                return wordData.positions.some(pos => pos.row === row && pos.col === col);
-            });
-        }
-        
-        function createWordList() {
-            const wordListDiv = document.getElementById('wordList');
-            wordListDiv.innerHTML = '';
             
-            words.forEach(word => {
-                const div = document.createElement('div');
-                div.className = 'word-item';
-                div.textContent = word;
-                div.id = `word-${word}`;
-                wordListDiv.appendChild(div);
-            });
-        }
-        
-        function setupControls() {
-            canvas.addEventListener('mousedown', startSelection);
-            canvas.addEventListener('mousemove', updateSelection);
-            canvas.addEventListener('mouseup', endSelection);
-            canvas.addEventListener('mouseleave', cancelSelection);
+            const col = Math.floor((pointer.x - offsetX) / cellSize);
+            const row = Math.floor((pointer.y - offsetY) / cellSize);
             
-            canvas.addEventListener('touchstart', handleTouchStart);
-            canvas.addEventListener('touchmove', handleTouchMove);
-            canvas.addEventListener('touchend', handleTouchEnd);
+            if (row >= 0 && row < gridSize && col >= 0 && col < gridSize) {
+                return {row, col};
+            }
+            
+            return null;
         }
         
-        function getCellFromEvent(e) {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const col = Math.floor(x / cellSize);
-            const row = Math.floor(y / cellSize);
-            return {row, col};
+        function drawSelection() {
+            if (!startCell || !currentCell) return;
+            
+            const offsetX = 50;
+            const offsetY = 100;
+            
+            selectionGraphics.clear();
+            selectionGraphics.lineStyle(4, 0xF7931E, 0.7);
+            selectionGraphics.beginPath();
+            selectionGraphics.moveTo(
+                offsetX + startCell.col * cellSize + cellSize / 2,
+                offsetY + startCell.row * cellSize + cellSize / 2
+            );
+            selectionGraphics.lineTo(
+                offsetX + currentCell.col * cellSize + cellSize / 2,
+                offsetY + currentCell.row * cellSize + cellSize / 2
+            );
+            selectionGraphics.strokePath();
         }
         
-        function startSelection(e) {
-            isSelecting = true;
-            startCell = getCellFromEvent(e);
-            currentCell = startCell;
-            drawGrid();
-        }
-        
-        function updateSelection(e) {
-            if (!isSelecting) return;
-            currentCell = getCellFromEvent(e);
-            drawGrid();
-        }
-        
-        function endSelection(e) {
-            if (!isSelecting) return;
-            isSelecting = false;
+        function checkSelection() {
+            if (!startCell || !currentCell) return;
             
             const selectedWord = getSelectedWord();
-            checkWord(selectedWord);
             
-            startCell = null;
-            currentCell = null;
-            drawGrid();
-        }
-        
-        function cancelSelection() {
-            isSelecting = false;
-            startCell = null;
-            currentCell = null;
-            drawGrid();
-        }
-        
-        function handleTouchStart(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousedown', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
+            wordPositions.forEach(wordData => {
+                if (wordData.word === selectedWord && !foundWords.includes(wordData)) {
+                    foundWords.push(wordData);
+                    markWordFound(wordData);
+                    
+                    // Update progress
+                    const progressText = gameScene.children.list.find(child => child.name === 'progressText');
+                    if (progressText) {
+                        progressText.setText(`Found: ${foundWords.length}/${words.length}`);
+                    }
+                    
+                    // Check completion
+                    if (foundWords.length === words.length) {
+                        setTimeout(completeGame, 500);
+                    }
+                }
             });
-            startSelection(mouseEvent);
-        }
-        
-        function handleTouchMove(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent('mousemove', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            updateSelection(mouseEvent);
-        }
-        
-        function handleTouchEnd(e) {
-            e.preventDefault();
-            endSelection(e);
         }
         
         function getSelectedWord() {
@@ -555,35 +487,85 @@
             return word;
         }
         
-        function checkWord(selectedWord) {
-            wordPositions.forEach(wordData => {
-                if (wordData.word === selectedWord && !foundWords.includes(wordData)) {
-                    foundWords.push(wordData);
-                    document.getElementById(`word-${wordData.word}`).classList.add('found');
-                    updateProgress();
-                    
-                    if (foundWords.length === words.length) {
-                        setTimeout(completeGame, 500);
-                    }
-                }
+        function markWordFound(wordData) {
+            const offsetX = 50;
+            const offsetY = 100;
+            
+            // Highlight cells
+            wordData.positions.forEach(pos => {
+                const x = offsetX + pos.col * cellSize;
+                const y = offsetY + pos.row * cellSize;
+                
+                const highlight = gameScene.add.graphics();
+                highlight.fillStyle(0x06FFA5, 1);
+                highlight.fillRect(x, y, cellSize, cellSize);
+                highlight.lineStyle(1, 0x00A8E8, 1);
+                highlight.strokeRect(x, y, cellSize, cellSize);
+                highlight.setDepth(-1);
             });
-        }
-        
-        function updateProgress() {
-            document.getElementById('progress').textContent = `Found: ${foundWords.length}/${words.length}`;
+            
+            // Update word list
+            const wordText = wordTexts[wordData.word];
+            if (wordText) {
+                wordText.setColor('#ffffff');
+                wordText.setBackgroundColor('#06FFA5');
+                wordText.setPadding(4);
+                wordText.setStyle({ textDecoration: 'line-through' });
+            }
         }
         
         function completeGame() {
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            startTime = null;
             
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('completion-screen').style.display = 'block';
-            document.getElementById('completion-time').textContent = `You found all words in ${elapsed} seconds!`;
+            // Clear scene
+            gameScene.children.removeAll();
             
-            // Send completion and track progress
+            // Show completion screen
+            const overlay = gameScene.add.graphics();
+            overlay.fillStyle(0x00A8E8, 0.95);
+            overlay.fillRect(0, 0, gameWidth, gameHeight);
+            overlay.setDepth(200);
+            
+            const successText = gameScene.add.text(gameWidth / 2, gameHeight / 2 - 120, '🎉 Excellent! 🎉', {
+                fontSize: '52px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            });
+            successText.setOrigin(0.5);
+            successText.setDepth(201);
+            
+            const completionText = gameScene.add.text(gameWidth / 2, gameHeight / 2 - 40, 
+                `You found all ${words.length} words in ${elapsed} seconds!\n\nYou're a word search master!`, {
+                fontSize: '24px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                align: 'center',
+                lineSpacing: 10
+            });
+            completionText.setOrigin(0.5);
+            completionText.setDepth(201);
+            
+            // Calculate score
             const score = Math.max(100 - elapsed, 10);
             const result = sendCompletionToWix(activityType, score, elapsed, themeName);
-            progressDifficulty(activityType);
+            
+            console.log('🎯 Completion result:', result);
+            console.log('📊 Current difficulty before progression:', difficultyLevel);
+            
+            // Progress difficulty
+            const oldDiff = getDifficultyLevel(difficultyKey);
+            progressDifficulty(difficultyKey);
+            const newDiff = getDifficultyLevel(difficultyKey);
+            
+            console.log('📈 Difficulty progression:', oldDiff, '→', newDiff);
+            
+            // Check if we've reached max difficulty
+            const maxDifficulty = DIFFICULTY_LEVELS[difficultyKey].length;
+            const hasMoreLevels = newDiff < maxDifficulty;
+            
+            console.log('🎯 Max difficulty:', maxDifficulty, '| Has more levels:', hasMoreLevels);
             
             // Show achievements
             if (result.newAchievements && result.newAchievements.length > 0) {
@@ -591,29 +573,58 @@
                     result.newAchievements.forEach((achievement, index) => {
                         setTimeout(() => showAchievement(achievement), index * 300);
                     });
-                }, 500);
+                }, 1000);
             }
+            
+            // Next Level or completion button
+            if (hasMoreLevels) {
+                const nextButton = gameScene.add.graphics();
+                nextButton.fillStyle(0x06FFA5, 1);
+                nextButton.fillRoundedRect(gameWidth / 2 - 100, gameHeight / 2 + 60, 200, 60, 10);
+                nextButton.setDepth(201);
+                
+                const nextText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 90, 'Next Level', {
+                    fontSize: '28px',
+                    fontFamily: 'Arial',
+                    color: '#1D3557',
+                    fontStyle: 'bold'
+                });
+                nextText.setOrigin(0.5);
+                nextText.setDepth(202);
+                nextText.setInteractive({ useHandCursor: true });
+                nextText.on('pointerdown', () => {
+                    console.log('Next Level clicked - reloading with difficulty:', newDiff);
+                    sessionStorage.setItem('skipIntro', 'true');
+                    location.reload();
+                });
+            } else {
+                const completeText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 90, '🏆 All Levels Complete! 🏆', {
+                    fontSize: '24px',
+                    fontFamily: 'Arial',
+                    color: '#06FFA5',
+                    fontStyle: 'bold'
+                });
+                completeText.setOrigin(0.5);
+                completeText.setDepth(202);
+            }
+            
+            // Back to menu button
+            const backText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 160, '← Back to Menu', {
+                fontSize: '20px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            });
+            backText.setOrigin(0.5);
+            backText.setDepth(202);
+            backText.setInteractive({ useHandCursor: true });
+            backText.on('pointerdown', () => {
+                console.log('Back to Menu clicked');
+                window.location.href = 'index.html';
+            });
         }
         
-        function resetGame() {
-            initGame();
-            updateProgress();
-        }
-        
-        function playAgain() {
-            document.getElementById('completion-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            resetGame();
-        }
-        
-        function restartGame() {
-            // Set flag to skip intro on reload
-            sessionStorage.setItem('skipIntro', 'true');
-            location.reload();
-        }
-        
-        function goBack() {
-            window.location.href = 'index.html';
+        function update() {
+            // Game loop
         }
     </script>
 </body>
