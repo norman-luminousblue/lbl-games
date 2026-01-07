@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect the Dots - Jellyfish</title>
+    <script src="js/themes.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/game-utils.js"></script>
+    <style>
+        :root {
+            --primary-color: #00A8E8;
+            --secondary-color: #0077B6;
+            --accent-color: #06FFA5;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 980px;
+            height: 760px;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        #intro-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        #intro-screen h1 {
+            font-size: 3em;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+        
+        #intro-screen .emoji {
+            font-size: 4em;
+            margin-bottom: 30px;
+        }
+        
+        #intro-screen p {
+            font-size: 1.2em;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        #start-button {
+            margin-top: 30px;
+            padding: 20px 60px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #0077B6;
+            background: #ffffff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+        }
+        
+        h1 {
+            color: #00A8E8;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        #instructions {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        canvas {
+            border: 3px solid #00A8E8;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto 20px;
+            cursor: pointer;
+            background: #E8F4F8;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-back {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-reset {
+            background: #F7931E;
+            color: white;
+        }
+        
+        #completion-screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        #completion-screen .emoji {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        #completion-screen h1 {
+            color: #00A8E8;
+            margin-bottom: 20px;
+        }
+        
+        #progress {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="intro-screen">
+        <div class="emoji">🪼</div>
+        <h1>Connect the Dots!</h1>
+        <p>Connect the numbered dots in order to reveal the jellyfish!</p>
+        <p>Click or tap each dot from 1 to finish.</p>
+        <button id="start-button">Start Drawing!</button>
+    </div>
+    
+    <div id="game-container">
+        <div id="game-screen">
+            <h1>🪼 Connect the Dots 🪼</h1>
+            <div id="instructions">Click the dots in order: 1, 2, 3...</div>
+            <div id="progress">Dot: 0/19</div>
+            
+            <canvas id="dotsCanvas" width="700" height="500"></canvas>
+            
+            <div class="controls">
+                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+                <button class="btn btn-reset" onclick="resetGame()">Reset</button>
+            </div>
+        </div>
+        
+        <div id="completion-screen">
+            <div class="emoji">🎉</div>
+            <h1>Beautiful Jellyfish!</h1>
+            <p style="font-size: 1.2em; color: #666; margin-bottom: 30px;">You connected all the dots!</p>
+            <div class="controls">
+                <button class="btn btn-done" onclick="restartGame()">Next Level ⬆️</button>
+                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Load theme and apply
+        const currentTheme = getCurrentTheme();
+        const themeName = localStorage.getItem('currentTheme') || 'jellyfish';
+        const activityType = sessionStorage.getItem('currentActivityType') || 'connect-dots';
+        applyTheme(currentTheme);
+        
+        const canvas = document.getElementById('dotsCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentDot = 1;
+        let startTime;
+        
+        // Get difficulty level
+        const difficultyLevel = getDifficultyLevel(activityType);
+        const difficultyConfig = DIFFICULTY_LEVELS.dots[difficultyLevel - 1];
+        
+        // Jellyfish shape coordinates - different complexities
+        const dotSets = {
+            1: [ // EASY - 15 dots (simple jellyfish)
+                {num: 1, x: 300, y: 100}, {num: 2, x: 360, y: 90}, {num: 3, x: 420, y: 110},
+                {num: 4, x: 450, y: 160}, {num: 5, x: 440, y: 220}, {num: 6, x: 380, y: 260},
+                {num: 7, x: 320, y: 270}, {num: 8, x: 260, y: 250}, {num: 9, x: 220, y: 200},
+                {num: 10, x: 230, y: 140}, {num: 11, x: 270, y: 110}, {num: 12, x: 300, y: 280},
+                {num: 13, x: 290, y: 350}, {num: 14, x: 370, y: 280}, {num: 15, x: 380, y: 360}
+            ],
+            2: [ // MEDIUM - 20 dots (original)
+                {num: 1, x: 280, y: 100}, {num: 2, x: 350, y: 80}, {num: 3, x: 420, y: 100},
+                {num: 4, x: 450, y: 140}, {num: 5, x: 460, y: 190}, {num: 6, x: 450, y: 240},
+                {num: 7, x: 400, y: 270}, {num: 8, x: 350, y: 280}, {num: 9, x: 300, y: 270},
+                {num: 10, x: 250, y: 240}, {num: 11, x: 240, y: 190}, {num: 12, x: 250, y: 140},
+                {num: 13, x: 280, y: 100}, {num: 14, x: 300, y: 280}, {num: 15, x: 290, y: 360},
+                {num: 16, x: 350, y: 280}, {num: 17, x: 350, y: 380}, {num: 18, x: 400, y: 280},
+                {num: 19, x: 410, y: 360}, {num: 20, x: 300, y: 100}
+            ],
+            3: [ // HARD - 25 dots (detailed jellyfish)
+                {num: 1, x: 280, y: 100}, {num: 2, x: 320, y: 85}, {num: 3, x: 360, y: 80},
+                {num: 4, x: 400, y: 90}, {num: 5, x: 430, y: 115}, {num: 6, x: 455, y: 150},
+                {num: 7, x: 465, y: 195}, {num: 8, x: 460, y: 235}, {num: 9, x: 440, y: 265},
+                {num: 10, x: 405, y: 280}, {num: 11, x: 365, y: 288}, {num: 12, x: 325, y: 285},
+                {num: 13, x: 285, y: 275}, {num: 14, x: 250, y: 255}, {num: 15, x: 230, y: 220},
+                {num: 16, x: 225, y: 180}, {num: 17, x: 235, y: 140}, {num: 18, x: 260, y: 110},
+                {num: 19, x: 280, y: 100}, {num: 20, x: 285, y: 285}, {num: 21, x: 280, y: 360},
+                {num: 22, x: 340, y: 288}, {num: 23, x: 340, y: 380}, {num: 24, x: 395, y: 285},
+                {num: 25, x: 405, y: 365}
+            ]
+        };
+        
+        const dots = dotSets[difficultyLevel] || dotSets[1];
+        
+        const totalDots = dots.length;
+        
+        document.getElementById('start-button').addEventListener('click', function() {
+            document.getElementById('intro-screen').style.display = 'none';
+            initGame();
+        });
+        
+        // Auto-start if coming from Next Level button
+        if (sessionStorage.getItem('skipIntro') === 'true') {
+            sessionStorage.removeItem('skipIntro');
+            document.getElementById('intro-screen').style.display = 'none';
+            setTimeout(() => initGame(), 100);
+        }
+        
+        function initGame() {
+            startTime = Date.now();
+            currentDot = 1;
+            drawDots();
+            canvas.addEventListener('click', handleClick);
+            canvas.addEventListener('touchstart', handleTouch);
+        }
+        
+        function drawDots() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw completed lines
+            if (currentDot > 1) {
+                ctx.strokeStyle = '#00A8E8';
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(dots[0].x, dots[0].y);
+                for (let i = 1; i < Math.min(currentDot, dots.length); i++) {
+                    ctx.lineTo(dots[i].x, dots[i].y);
+                }
+                ctx.stroke();
+            }
+            
+            // Draw dots
+            dots.forEach(dot => {
+                if (dot.num < currentDot) {
+                    // Connected dot
+                    ctx.fillStyle = '#06FFA5';
+                    ctx.beginPath();
+                    ctx.arc(dot.x, dot.y, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (dot.num === currentDot) {
+                    // Current dot (highlighted)
+                    ctx.fillStyle = '#F7931E';
+                    ctx.beginPath();
+                    ctx.arc(dot.x, dot.y, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#E67E00';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                } else {
+                    // Unconnected dot
+                    ctx.fillStyle = '#0077B6';
+                    ctx.beginPath();
+                    ctx.arc(dot.x, dot.y, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Draw number with background for better visibility
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y - 22, 14, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(dot.num, dot.x, dot.y - 22);
+            });
+            
+            // Update progress
+            document.getElementById('progress').textContent = `Dot: ${Math.max(0, currentDot - 1)}/${totalDots}`;
+        }
+        
+        function handleClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            checkDotClick(x, y);
+        }
+        
+        function handleTouch(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            checkDotClick(x, y);
+        }
+        
+        function checkDotClick(x, y) {
+            const dot = dots.find(d => d.num === currentDot);
+            if (!dot) return;
+            
+            const distance = Math.sqrt((x - dot.x) ** 2 + (y - dot.y) ** 2);
+            
+            if (distance < 20) {
+                currentDot++;
+                drawDots();
+                
+                if (currentDot > totalDots) {
+                    completeGame();
+                }
+            }
+        }
+        
+        function completeGame() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            
+            // Draw final filled jellyfish bell
+            ctx.fillStyle = 'rgba(168, 218, 220, 0.5)';
+            ctx.beginPath();
+            ctx.moveTo(dots[0].x, dots[0].y);
+            for (let i = 1; i <= 12; i++) {
+                ctx.lineTo(dots[i].x, dots[i].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            setTimeout(() => {
+                document.getElementById('game-screen').style.display = 'none';
+                document.getElementById('completion-screen').style.display = 'block';
+                
+                // Send completion and track progress
+                const score = Math.max(100 - elapsed, 10);
+                const result = sendCompletionToWix(activityType, score, elapsed, themeName);
+                progressDifficulty(activityType);
+                
+                // Show achievements
+                if (result.newAchievements && result.newAchievements.length > 0) {
+                    setTimeout(() => {
+                        result.newAchievements.forEach((achievement, index) => {
+                            setTimeout(() => showAchievement(achievement), index * 300);
+                        });
+                    }, 500);
+                }
+            }, 1000);
+        }
+        
+        function resetGame() {
+            currentDot = 1;
+            drawDots();
+            startTime = Date.now();
+        }
+        
+        function playAgain() {
+            document.getElementById('completion-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            resetGame();
+        }
+        
+        function restartGame() {
+            // Set flag to skip intro on reload
+            sessionStorage.setItem('skipIntro', 'true');
+            location.reload();
+        }
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect the Dots - Jellyfish</title>
+    <title>Connect the Dots</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
     <script src="js/themes.js"></script>
     <script src="js/rewards.js"></script>
     <script src="js/game-utils.js"></script>
@@ -25,188 +26,20 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+        #game-container {
             width: 980px;
             height: 760px;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-        }
-        
-        #game-container {
-            width: 100%;
-            height: 100%;
             background: white;
             border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-        }
-        
-        #intro-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #00A8E8 0%, #0077B6 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        
-        #intro-screen h1 {
-            font-size: 3em;
-            color: #ffffff;
-            margin-bottom: 20px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
-        }
-        
-        #intro-screen .emoji {
-            font-size: 4em;
-            margin-bottom: 30px;
-        }
-        
-        #intro-screen p {
-            font-size: 1.2em;
-            color: #ffffff;
-            margin-bottom: 15px;
-            text-align: center;
-            max-width: 400px;
-        }
-        
-        #start-button {
-            margin-top: 30px;
-            padding: 20px 60px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #0077B6;
-            background: #ffffff;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-        }
-        
-        #start-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
-        }
-        
-        h1 {
-            color: #00A8E8;
-            margin-bottom: 10px;
-            font-size: 2em;
-        }
-        
-        #instructions {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 1.1em;
-        }
-        
-        canvas {
-            border: 3px solid #00A8E8;
-            border-radius: 10px;
-            display: block;
-            margin: 0 auto 20px;
-            cursor: pointer;
-            background: #E8F4F8;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .btn {
-            padding: 12px 30px;
-            font-size: 1.1em;
-            font-weight: bold;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-        
-        .btn-back {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-reset {
-            background: #F7931E;
-            color: white;
-        }
-        
-        #completion-screen {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-        
-        #completion-screen .emoji {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
-        
-        #completion-screen h1 {
-            color: #00A8E8;
-            margin-bottom: 20px;
-        }
-        
-        #progress {
-            font-size: 1.2em;
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: bold;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
-    <div id="intro-screen">
-        <div class="emoji">🪼</div>
-        <h1>Connect the Dots!</h1>
-        <p>Connect the numbered dots in order to reveal the jellyfish!</p>
-        <p>Click or tap each dot from 1 to finish.</p>
-        <button id="start-button">Start Drawing!</button>
-    </div>
-    
-    <div id="game-container">
-        <div id="game-screen">
-            <h1>🪼 Connect the Dots 🪼</h1>
-            <div id="instructions">Click the dots in order: 1, 2, 3...</div>
-            <div id="progress">Dot: 0/19</div>
-            
-            <canvas id="dotsCanvas" width="700" height="500"></canvas>
-            
-            <div class="controls">
-                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
-                <button class="btn btn-reset" onclick="resetGame()">Reset</button>
-            </div>
-        </div>
-        
-        <div id="completion-screen">
-            <div class="emoji">🎉</div>
-            <h1>Beautiful Jellyfish!</h1>
-            <p style="font-size: 1.2em; color: #666; margin-bottom: 30px;">You connected all the dots!</p>
-            <div class="controls">
-                <button class="btn btn-done" onclick="restartGame()">Next Level ⬆️</button>
-                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
-            </div>
-        </div>
-    </div>
+    <div id="game-container"></div>
     
     <script>
         // Load theme and apply
@@ -215,16 +48,20 @@
         const activityType = sessionStorage.getItem('currentActivityType') || 'connect-dots';
         applyTheme(currentTheme);
         
-        const canvas = document.getElementById('dotsCanvas');
-        const ctx = canvas.getContext('2d');
-        let currentDot = 1;
+        // Activity tracking
+        const activityTracker = new ActivityTracker();
         let startTime;
         
         // Get difficulty level
         const difficultyLevel = getDifficultyLevel(activityType);
         const difficultyConfig = DIFFICULTY_LEVELS.dots[difficultyLevel - 1];
         
-        // Jellyfish shape coordinates - different complexities
+        console.log('🎮 PHASER VERSION LOADED');
+        console.log('Difficulty Level:', difficultyLevel);
+        console.log('Difficulty Config:', difficultyConfig);
+        console.log('Activity Type:', activityType);
+        
+        // Dot sets for different difficulties
         const dotSets = {
             1: [ // EASY - 15 dots (simple jellyfish)
                 {num: 1, x: 300, y: 100}, {num: 2, x: 360, y: 90}, {num: 3, x: 420, y: 110},
@@ -256,172 +93,312 @@
         };
         
         const dots = dotSets[difficultyLevel] || dotSets[1];
+        let currentDot = 1;
+        let completedPath = [];
+        let titleText, instructionText, progressText;
+        let dotSprites = [];
+        let lineGraphics;
+        let game;
         
-        const totalDots = dots.length;
+        console.log('Total dots for this level:', dots.length);
+        console.log('Expected dots:', difficultyConfig.count);
         
-        document.getElementById('start-button').addEventListener('click', function() {
-            document.getElementById('intro-screen').style.display = 'none';
-            initGame();
-        });
-        
-        // Auto-start if coming from Next Level button
-        if (sessionStorage.getItem('skipIntro') === 'true') {
-            sessionStorage.removeItem('skipIntro');
-            document.getElementById('intro-screen').style.display = 'none';
-            setTimeout(() => initGame(), 100);
-        }
-        
-        function initGame() {
-            startTime = Date.now();
-            currentDot = 1;
-            drawDots();
-            canvas.addEventListener('click', handleClick);
-            canvas.addEventListener('touchstart', handleTouch);
-        }
-        
-        function drawDots() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw completed lines
-            if (currentDot > 1) {
-                ctx.strokeStyle = '#00A8E8';
-                ctx.lineWidth = 4;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(dots[0].x, dots[0].y);
-                for (let i = 1; i < Math.min(currentDot, dots.length); i++) {
-                    ctx.lineTo(dots[i].x, dots[i].y);
-                }
-                ctx.stroke();
+        const config = {
+            type: Phaser.AUTO,
+            parent: 'game-container',
+            width: 980,
+            height: 760,
+            backgroundColor: '#FFFFFF',
+            scene: {
+                create: create,
+                update: update
             }
+        };
+        
+        // Initialize game
+        game = new Phaser.Game(config);
+        
+        function create() {
+            const scene = this;
+            const sceneWidth = scene.scale.width;
+            const sceneHeight = scene.scale.height;
             
-            // Draw dots
-            dots.forEach(dot => {
-                if (dot.num < currentDot) {
-                    // Connected dot
-                    ctx.fillStyle = '#06FFA5';
-                    ctx.beginPath();
-                    ctx.arc(dot.x, dot.y, 8, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (dot.num === currentDot) {
-                    // Current dot (highlighted)
-                    ctx.fillStyle = '#F7931E';
-                    ctx.beginPath();
-                    ctx.arc(dot.x, dot.y, 12, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = '#E67E00';
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
-                } else {
-                    // Unconnected dot
-                    ctx.fillStyle = '#0077B6';
-                    ctx.beginPath();
-                    ctx.arc(dot.x, dot.y, 8, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                
-                // Draw number with background for better visibility
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(dot.x, dot.y - 22, 14, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.fillStyle = '#333';
-                ctx.font = 'bold 16px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(dot.num, dot.x, dot.y - 22);
+            // Check if we should skip intro
+            const skipIntro = sessionStorage.getItem('skipIntro') === 'true';
+            if (skipIntro) {
+                sessionStorage.removeItem('skipIntro');
+                startGame(scene);
+            } else {
+                showIntro(scene);
+            }
+        }
+        
+        function showIntro(scene) {
+            const sceneWidth = scene.scale.width;
+            const sceneHeight = scene.scale.height;
+            
+            // Intro background
+            const introBg = scene.add.rectangle(0, 0, sceneWidth, sceneHeight, 0x00A8E8, 1);
+            introBg.setOrigin(0, 0);
+            
+            // Title
+            const title = scene.add.text(sceneWidth / 2, sceneHeight * 0.3, 'Connect the Dots! (PHASER)', {
+                fontSize: '48px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            
+            // Emoji
+            const emoji = scene.add.text(sceneWidth / 2, sceneHeight * 0.45, '✏️', {
+                fontSize: '80px'
+            }).setOrigin(0.5);
+            
+            // Instructions
+            const instructions = scene.add.text(sceneWidth / 2, sceneHeight * 0.6, 
+                `Connect the numbered dots in order to reveal the picture!\nLevel ${difficultyLevel}: ${difficultyConfig.name} | Dots: ${dots.length}`, {
+                fontSize: '20px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                align: 'center'
+            }).setOrigin(0.5);
+            
+            // Start button
+            const startBtn = scene.add.rectangle(sceneWidth / 2, sceneHeight * 0.75, 200, 60, 0xFFFFFF);
+            startBtn.setInteractive({ useHandCursor: true });
+            const startText = scene.add.text(sceneWidth / 2, sceneHeight * 0.75, 'Start Drawing!', {
+                fontSize: '24px',
+                fontFamily: 'Arial',
+                color: '#00A8E8',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            
+            startBtn.on('pointerdown', () => {
+                introBg.destroy();
+                title.destroy();
+                emoji.destroy();
+                instructions.destroy();
+                startBtn.destroy();
+                startText.destroy();
+                startGame(scene);
             });
             
-            // Update progress
-            document.getElementById('progress').textContent = `Dot: ${Math.max(0, currentDot - 1)}/${totalDots}`;
-        }
-        
-        function handleClick(e) {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            checkDotClick(x, y);
-        }
-        
-        function handleTouch(e) {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            checkDotClick(x, y);
-        }
-        
-        function checkDotClick(x, y) {
-            const dot = dots.find(d => d.num === currentDot);
-            if (!dot) return;
+            startBtn.on('pointerover', () => {
+                startBtn.setScale(1.05);
+                startText.setScale(1.05);
+            });
             
-            const distance = Math.sqrt((x - dot.x) ** 2 + (y - dot.y) ** 2);
-            
-            if (distance < 20) {
-                currentDot++;
-                drawDots();
-                
-                if (currentDot > totalDots) {
-                    completeGame();
-                }
-            }
+            startBtn.on('pointerout', () => {
+                startBtn.setScale(1);
+                startText.setScale(1);
+            });
         }
         
-        function completeGame() {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        function startGame(scene) {
+            const sceneWidth = scene.scale.width;
+            const sceneHeight = scene.scale.height;
             
-            // Draw final filled jellyfish bell
-            ctx.fillStyle = 'rgba(168, 218, 220, 0.5)';
-            ctx.beginPath();
-            ctx.moveTo(dots[0].x, dots[0].y);
-            for (let i = 1; i <= 12; i++) {
-                ctx.lineTo(dots[i].x, dots[i].y);
-            }
-            ctx.closePath();
-            ctx.fill();
-            
-            setTimeout(() => {
-                document.getElementById('game-screen').style.display = 'none';
-                document.getElementById('completion-screen').style.display = 'block';
-                
-                // Send completion and track progress
-                const score = Math.max(100 - elapsed, 10);
-                const result = sendCompletionToWix(activityType, score, elapsed, themeName);
-                progressDifficulty(activityType);
-                
-                // Show achievements
-                if (result.newAchievements && result.newAchievements.length > 0) {
-                    setTimeout(() => {
-                        result.newAchievements.forEach((achievement, index) => {
-                            setTimeout(() => showAchievement(achievement), index * 300);
-                        });
-                    }, 500);
-                }
-            }, 1000);
-        }
-        
-        function resetGame() {
-            currentDot = 1;
-            drawDots();
             startTime = Date.now();
+            currentDot = 1;
+            completedPath = [];
+            
+            // Title
+            titleText = scene.add.text(sceneWidth / 2, 30, `Connect the Dots - ${currentTheme.name}`, {
+                fontSize: '28px',
+                fontFamily: 'Arial',
+                color: '#' + currentTheme.colors.primary.toString(16),
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            
+            // Instructions
+            instructionText = scene.add.text(sceneWidth / 2, 65, 'Click the dots in order!', {
+                fontSize: '18px',
+                fontFamily: 'Arial',
+                color: '#666666'
+            }).setOrigin(0.5);
+            
+            // Progress
+            progressText = scene.add.text(sceneWidth / 2, 95, `Dot: 1 / ${dots.length}`, {
+                fontSize: '16px',
+                fontFamily: 'Arial',
+                color: '#333333'
+            }).setOrigin(0.5);
+            
+            // Create line graphics
+            lineGraphics = scene.add.graphics();
+            
+            // Create dots
+            dots.forEach((dot, index) => {
+                // Dot circle
+                const circle = scene.add.circle(dot.x, dot.y + 50, 15, 0x667eea, 0.8);
+                circle.setStrokeStyle(3, 0xFFFFFF);
+                circle.setInteractive({ useHandCursor: true });
+                circle.dotData = dot;
+                
+                // Dot number
+                const number = scene.add.text(dot.x, dot.y + 50, dot.num, {
+                    fontSize: '16px',
+                    fontFamily: 'Arial',
+                    color: '#ffffff',
+                    fontStyle: 'bold'
+                }).setOrigin(0.5);
+                
+                // Click handler
+                circle.on('pointerdown', () => handleDotClick(scene, circle, dot));
+                
+                // Hover effect
+                circle.on('pointerover', () => {
+                    if (dot.num === currentDot) {
+                        circle.setScale(1.2);
+                        number.setScale(1.2);
+                    }
+                });
+                
+                circle.on('pointerout', () => {
+                    circle.setScale(1);
+                    number.setScale(1);
+                });
+                
+                dotSprites.push({ circle, number, dot });
+            });
+            
+            // Back button
+            const backBtn = scene.add.rectangle(80, sceneHeight - 40, 140, 40, 0x667eea);
+            backBtn.setInteractive({ useHandCursor: true });
+            const backText = scene.add.text(80, sceneHeight - 40, '← Menu', {
+                fontSize: '18px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+            
+            backBtn.on('pointerdown', () => {
+                window.location.href = 'index.html';
+            });
         }
         
-        function playAgain() {
-            document.getElementById('completion-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            resetGame();
+        function handleDotClick(scene, circle, dot) {
+            if (dot.num !== currentDot) {
+                // Wrong dot - shake it
+                scene.tweens.add({
+                    targets: circle,
+                    x: circle.x + 10,
+                    duration: 50,
+                    yoyo: true,
+                    repeat: 3
+                });
+                return;
+            }
+            
+            // Correct dot
+            circle.setFillStyle(0x51cf66);
+            completedPath.push({ x: dot.x, y: dot.y + 50 });
+            
+            // Draw line to previous dot
+            if (completedPath.length > 1) {
+                const prev = completedPath[completedPath.length - 2];
+                const curr = completedPath[completedPath.length - 1];
+                
+                lineGraphics.lineStyle(3, 0x667eea, 1);
+                lineGraphics.beginPath();
+                lineGraphics.moveTo(prev.x, prev.y);
+                lineGraphics.lineTo(curr.x, curr.y);
+                lineGraphics.strokePath();
+            }
+            
+            currentDot++;
+            progressText.setText(`Dot: ${currentDot - 1} / ${dots.length}`);
+            
+            // Check completion
+            if (currentDot > dots.length) {
+                completeActivity(scene);
+            }
         }
         
-        function restartGame() {
-            // Set flag to skip intro on reload
-            sessionStorage.setItem('skipIntro', 'true');
-            location.reload();
+        function completeActivity(scene) {
+            const sceneWidth = scene.scale.width;
+            const sceneHeight = scene.scale.height;
+            const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+            const score = 100;
+            
+            console.log('🎉 Activity completed!');
+            console.log('Current difficulty before progression:', difficultyLevel);
+            
+            // Send completion data
+            const result = sendCompletionToWix(activityType, score, timeSpent, themeName);
+            const newDifficulty = progressDifficulty(activityType);
+            
+            console.log('New difficulty after progression:', newDifficulty);
+            console.log('Next time will have dots:', DIFFICULTY_LEVELS.dots[newDifficulty - 1].count);
+            
+            // Show achievements
+            if (result.newAchievements && result.newAchievements.length > 0) {
+                setTimeout(() => {
+                    result.newAchievements.forEach((achievement, index) => {
+                        setTimeout(() => showAchievement(achievement), index * 300);
+                    });
+                }, 1000);
+            }
+            
+            // Completion overlay
+            const overlay = scene.add.rectangle(0, 0, sceneWidth, sceneHeight, 0x000000, 0.7);
+            overlay.setOrigin(0, 0);
+            
+            // Emoji
+            scene.add.text(sceneWidth / 2, sceneHeight * 0.35, '🎉', {
+                fontSize: '80px'
+            }).setOrigin(0.5);
+            
+            // Title
+            scene.add.text(sceneWidth / 2, sceneHeight * 0.5, 'Perfect!', {
+                fontSize: '48px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            
+            // Time
+            scene.add.text(sceneWidth / 2, sceneHeight * 0.58, `Time: ${timeSpent} seconds`, {
+                fontSize: '20px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            }).setOrigin(0.5);
+            
+            // Buttons
+            const btnY = sceneHeight * 0.72;
+            const btnSpacing = 180;
+            
+            // Next Level button
+            const nextBtn = scene.add.rectangle(sceneWidth / 2 - btnSpacing / 2, btnY, 160, 50, 0x51cf66);
+            nextBtn.setInteractive({ useHandCursor: true });
+            const nextText = scene.add.text(sceneWidth / 2 - btnSpacing / 2, btnY, 'Next Level ⬆️', {
+                fontSize: '18px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            
+            nextBtn.on('pointerdown', () => {
+                sessionStorage.setItem('skipIntro', 'true');
+                location.reload();
+            });
+            
+            // Back to Menu button
+            const backBtn = scene.add.rectangle(sceneWidth / 2 + btnSpacing / 2, btnY, 160, 50, 0x667eea);
+            backBtn.setInteractive({ useHandCursor: true });
+            const backText = scene.add.text(sceneWidth / 2 + btnSpacing / 2, btnY, '← Menu', {
+                fontSize: '18px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            
+            backBtn.on('pointerdown', () => {
+                window.location.href = 'index.html';
+            });
         }
         
-        function goBack() {
-            window.location.href = 'index.html';
+        function update() {
+            // Game loop if needed
         }
     </script>
 </body>
