@@ -2,744 +2,449 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Coloring Fun</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coloring Fun - Paint the Ocean!</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
     <script src="js/themes.js"></script>
     <script src="js/rewards.js"></script>
     <script src="js/game-utils.js"></script>
     <style>
-        :root {
-            --primary-color: #00A8E8;
-            --secondary-color: #0077B6;
-            --accent-color: #06FFA5;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 980px;
-            height: 760px;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
+            min-height: 100vh;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
         }
         #game-container {
-            width: 100%;
-            max-width: 980px;
-            height: 760px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            overflow-y: auto;
-        }
-        
-        /* Intro Screen */
-        #intro-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-        #intro-screen h1 {
-            font-size: 3em;
-            color: #ffffff;
-            margin-bottom: 20px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
-            animation: bounce 1s ease-in-out infinite;
-        }
-        #intro-screen .emoji {
-            font-size: 4em;
-            margin-bottom: 30px;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-        #intro-screen p {
-            font-size: 1.2em;
-            color: #ffffff;
-            margin-bottom: 15px;
             text-align: center;
-            max-width: 400px;
-            line-height: 1.6;
-        }
-        #start-button {
-            margin-top: 30px;
-            padding: 20px 60px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #764ba2;
-            background: #ffffff;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-        }
-        #start-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        /* Game Screen */
-        #game-screen {
-            display: none;
-            padding: 15px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        
-        .header h1 {
-            color: #764ba2;
-            font-size: 1.8em;
-            margin-bottom: 5px;
-        }
-        
-        .color-palette {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .color-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 3px solid #ddd;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .color-btn:hover, .color-btn.selected {
-            transform: scale(1.2);
-            border-color: #333;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        
-        #canvas-container {
-            background: white;
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-        }
-        
-        canvas {
-            border: 3px solid #764ba2;
-            border-radius: 10px;
-            cursor: crosshair;
-            display: block;
-            margin: 0 auto;
-            touch-action: none;
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 10px 25px;
-            font-size: 0.9em;
-            font-weight: bold;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: white;
-        }
-        
-        .btn-clear {
-            background: #ff6b6b;
-        }
-        
-        .btn-done {
-            background: #51cf66;
-        }
-        
-        .btn-back {
-            background: #667eea;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        /* Completion Screen */
-        #completion-screen {
-            display: none;
-            text-align: center;
-            padding: 40px 20px;
-        }
-        
-        #completion-screen h1 {
-            color: #764ba2;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-        
-        #completion-screen .emoji {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
-        
-        /* Mobile Responsive */
-        @media (max-width: 600px) {
-            #intro-screen h1 {
-                font-size: 2em;
-            }
-            .header h1 {
-                font-size: 1.5em;
-            }
-            .color-btn {
-                width: 40px;
-                height: 40px;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Intro Screen -->
-    <div id="intro-screen">
-        <div class="emoji">🪼</div>
-        <h1>Jellyfish Coloring Adventure!</h1>
-        <p>Bring the underwater world to life with your favorite colors!</p>
-        <p>Color the jellyfish and its ocean friends.</p>
-        <button id="start-button">Start Coloring</button>
-    </div>
-    
-    <!-- Game Container -->
-    <div id="game-container">
-        <!-- Game Screen -->
-        <div id="game-screen">
-            <div class="header">
-                <h1>🪼 Jellyfish Coloring 🪼</h1>
-            </div>
-            
-            <div class="color-palette" id="colorPalette">
-                <!-- Colors will be added by JavaScript -->
-            </div>
-            
-            <div id="canvas-container">
-                <canvas id="coloringCanvas"></canvas>
-            </div>
-            
-            <div class="controls">
-                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
-                <button class="btn btn-clear" onclick="clearCanvas()">Clear</button>
-                <button class="btn" id="sound-toggle" onclick="toggleSound()">🔊 Sound</button>
-                <button class="btn btn-done" onclick="completeColoring()">Done!</button>
-            </div>
-        </div>
-        
-        <!-- Completion Screen -->
-        <div id="completion-screen">
-            <div class="emoji">🎉</div>
-            <h1>Amazing Work!</h1>
-            <p style="font-size: 1.2em; color: #666; margin-bottom: 20px;">Your artwork is beautiful!</p>
-            <div class="controls">
-                <button class="btn btn-done" onclick="restartGame()">Next Level ⬆️</button>
-                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
-            </div>
-        </div>
-    </div>
+    <div id="game-container"></div>
     
     <script>
-        // Load theme and apply
+        console.log('🎮 COLORING PHASER VERSION LOADED');
+        
+        // Activity configuration
+        const activityType = 'coloring';
+        const difficultyKey = 'coloring';
+        
+        // Load theme
         const currentTheme = getCurrentTheme();
         const themeName = localStorage.getItem('currentTheme') || 'jellyfish';
-        const activityType = sessionStorage.getItem('currentActivityType') || 'coloring';
         applyTheme(currentTheme);
         
-        let canvas, ctx;
-        let currentColor = '#FF6B35';
-        let startTime;
-        let coloredAreas = 0;
+        // Get difficulty level
+        const difficultyLevel = getDifficultyLevel(difficultyKey);
+        const difficultyConfig = DIFFICULTY_LEVELS[difficultyKey][difficultyLevel - 1];
         
-        // Audio context for sound effects
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let musicGain = audioContext.createGain();
-        musicGain.connect(audioContext.destination);
-        musicGain.gain.value = 0.12;
-        let isMusicPlaying = false;
+        console.log('📊 Difficulty Level:', difficultyLevel);
+        console.log('📋 Config:', difficultyConfig);
         
-        // Background music - gentle, creative melody
-        function startBackgroundMusic() {
-            if (isMusicPlaying) return;
-            isMusicPlaying = true;
-            
-            const notes = [392.00, 440.00, 493.88, 523.25, 493.88, 440.00, 392.00]; // G4, A4, B4, C5, B4, A4, G4
-            const noteDuration = 0.4;
-            let noteIndex = 0;
-            
-            function playNextNote() {
-                if (!isMusicPlaying) return;
-                
-                const osc = audioContext.createOscillator();
-                const noteGain = audioContext.createGain();
-                
-                osc.connect(noteGain);
-                noteGain.connect(musicGain);
-                
-                osc.frequency.value = notes[noteIndex % notes.length];
-                osc.type = 'sine';
-                
-                noteGain.gain.setValueAtTime(0.4, audioContext.currentTime);
-                noteGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + noteDuration);
-                
-                osc.start(audioContext.currentTime);
-                osc.stop(audioContext.currentTime + noteDuration);
-                
-                noteIndex++;
-                setTimeout(playNextNote, noteDuration * 1000);
-            }
-            
-            playNextNote();
-        }
+        const gameWidth = 700;
+        const gameHeight = 600;
         
-        function stopBackgroundMusic() {
-            isMusicPlaying = false;
-        }
-        
-        // Function to play color selection sound
-        function playColorSelectSound() {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.value = 600;
-            oscillator.type = 'sine';
-            
-            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.08);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.08);
-        }
-        
+        // Color palette
         const colors = [
-            '#FF6B35', '#F7931E', '#FDC830', '#C1D82F', 
-            '#00A8E8', '#0077B6', '#7209B7', '#F72585',
-            '#E63946', '#A8DADC', '#457B9D', '#1D3557',
-            '#06FFA5', '#FFFFFF', '#000000', '#8B4513'
+            0xFF6B35, 0xF7931E, 0xFDC830, 0xC1D82F, 
+            0x00A8E8, 0x0077B6, 0x7209B7, 0xF72585,
+            0xE63946, 0xA8DADC, 0x457B9D, 0x1D3557,
+            0x06FFA5, 0xFFFFFF, 0x000000, 0x8B4513
         ];
         
-        // Get difficulty level and load appropriate shapes
-        const difficultyLevel = getDifficultyLevel('coloring');
-        console.log('Coloring game difficulty level:', difficultyLevel);
+        let selectedColor = colors[0];
+        let gameScene;
+        let shapes = [];
+        let startTime;
+        let coloredCount = 0;
         
-        // Jellyfish themed shapes - different complexity levels
+        // Shape definitions based on difficulty
         const shapeSets = {
-            1: [ // EASY - 8 simple shapes
-                // Jellyfish bell (main body)
-                { type: 'circle', x: 300, y: 120, r: 60, color: null },
-                // Jellyfish tentacles (2 simple)
-                { type: 'rect', x: 280, y: 180, w: 15, h: 120, color: null },
-                { type: 'rect', x: 310, y: 185, w: 15, h: 125, color: null },
-                // Small fish friend
-                { type: 'circle', x: 100, y: 100, r: 30, color: null },
-                { type: 'triangle', x1: 130, y1: 100, x2: 160, y2: 90, x3: 160, y3: 110, color: null },
-                // Bubbles
-                { type: 'circle', x: 450, y: 80, r: 20, color: null },
-                { type: 'circle', x: 500, y: 120, r: 15, color: null },
-                // Seaweed
-                { type: 'rect', x: 50, y: 280, w: 20, h: 100, color: null }
+            1: [ // EASY - 8 shapes
+                { type: 'circle', x: 350, y: 200, r: 60, colored: false },
+                { type: 'rect', x: 330, y: 260, w: 15, h: 120, colored: false },
+                { type: 'rect', x: 360, y: 265, w: 15, h: 125, colored: false },
+                { type: 'circle', x: 150, y: 180, r: 30, colored: false },
+                { type: 'triangle', x1: 180, y1: 180, x2: 210, y2: 170, x3: 210, y3: 190, colored: false },
+                { type: 'circle', x: 550, y: 150, r: 20, colored: false },
+                { type: 'circle', x: 600, y: 190, r: 15, colored: false },
+                { type: 'rect', x: 50, y: 400, w: 20, h: 100, colored: false }
             ],
-            2: [ // MEDIUM - 13 shapes (original)
-                // Jellyfish bell
-                { type: 'circle', x: 300, y: 120, r: 60, color: null },
-                // Jellyfish tentacles (3)
-                { type: 'rect', x: 270, y: 180, w: 15, h: 120, color: null },
-                { type: 'rect', x: 295, y: 190, w: 15, h: 130, color: null },
-                { type: 'rect', x: 320, y: 185, w: 15, h: 125, color: null },
-                // Small fish friend
-                { type: 'circle', x: 100, y: 100, r: 30, color: null },
-                { type: 'triangle', x1: 130, y1: 100, x2: 160, y2: 90, x3: 160, y3: 110, color: null },
-                // Bubbles
-                { type: 'circle', x: 450, y: 80, r: 20, color: null },
-                { type: 'circle', x: 500, y: 120, r: 15, color: null },
-                { type: 'circle', x: 530, y: 90, r: 18, color: null },
-                // Seaweed
-                { type: 'rect', x: 50, y: 280, w: 20, h: 100, color: null },
-                { type: 'rect', x: 540, y: 250, w: 25, h: 130, color: null },
-                // Ocean floor elements
-                { type: 'circle', x: 200, y: 350, r: 25, color: null },
-                { type: 'circle', x: 400, y: 360, r: 20, color: null }
+            2: [ // MEDIUM - 13 shapes
+                { type: 'circle', x: 350, y: 200, r: 60, colored: false },
+                { type: 'rect', x: 320, y: 260, w: 15, h: 120, colored: false },
+                { type: 'rect', x: 345, y: 270, w: 15, h: 130, colored: false },
+                { type: 'rect', x: 370, y: 265, w: 15, h: 125, colored: false },
+                { type: 'circle', x: 150, y: 180, r: 30, colored: false },
+                { type: 'triangle', x1: 180, y1: 180, x2: 210, y2: 170, x3: 210, y3: 190, colored: false },
+                { type: 'circle', x: 550, y: 150, r: 20, colored: false },
+                { type: 'circle', x: 600, y: 190, r: 15, colored: false },
+                { type: 'circle', x: 630, y: 160, r: 18, colored: false },
+                { type: 'rect', x: 50, y: 400, w: 20, h: 100, colored: false },
+                { type: 'rect', x: 640, y: 370, w: 25, h: 130, colored: false },
+                { type: 'circle', x: 250, y: 480, r: 25, colored: false },
+                { type: 'circle', x: 450, y: 490, r: 20, colored: false }
             ],
-            3: [ // HARD - 20 shapes (more detailed)
-                // Jellyfish bell with details
-                { type: 'circle', x: 300, y: 120, r: 60, color: null },
-                { type: 'circle', x: 300, y: 115, r: 35, color: null }, // inner detail
-                // Jellyfish tentacles (5)
-                { type: 'rect', x: 260, y: 180, w: 12, h: 120, color: null },
-                { type: 'rect', x: 280, y: 185, w: 12, h: 130, color: null },
-                { type: 'rect', x: 300, y: 190, w: 12, h: 125, color: null },
-                { type: 'rect', x: 320, y: 185, w: 12, h: 130, color: null },
-                { type: 'rect', x: 340, y: 180, w: 12, h: 120, color: null },
-                // Two fish friends
-                { type: 'circle', x: 100, y: 100, r: 30, color: null },
-                { type: 'triangle', x1: 130, y1: 100, x2: 160, y2: 90, x3: 160, y3: 110, color: null },
-                { type: 'circle', x: 480, y: 200, r: 25, color: null },
-                { type: 'triangle', x1: 505, y1: 200, x2: 530, y2: 190, x3: 530, y3: 210, color: null },
-                // More bubbles
-                { type: 'circle', x: 450, y: 80, r: 20, color: null },
-                { type: 'circle', x: 500, y: 120, r: 15, color: null },
-                { type: 'circle', x: 530, y: 90, r: 18, color: null },
-                { type: 'circle', x: 420, y: 150, r: 12, color: null },
-                // More seaweed
-                { type: 'rect', x: 50, y: 280, w: 20, h: 100, color: null },
-                { type: 'rect', x: 540, y: 250, w: 25, h: 130, color: null },
-                // Ocean floor details
-                { type: 'circle', x: 200, y: 350, r: 25, color: null },
-                { type: 'circle', x: 400, y: 360, r: 20, color: null }
+            3: [ // HARD - 20 shapes
+                { type: 'circle', x: 350, y: 200, r: 60, colored: false },
+                { type: 'circle', x: 350, y: 195, r: 35, colored: false },
+                { type: 'rect', x: 310, y: 260, w: 12, h: 120, colored: false },
+                { type: 'rect', x: 330, y: 265, w: 12, h: 130, colored: false },
+                { type: 'rect', x: 350, y: 270, w: 12, h: 125, colored: false },
+                { type: 'rect', x: 370, y: 265, w: 12, h: 130, colored: false },
+                { type: 'rect', x: 390, y: 260, w: 12, h: 120, colored: false },
+                { type: 'circle', x: 150, y: 180, r: 30, colored: false },
+                { type: 'triangle', x1: 180, y1: 180, x2: 210, y2: 170, x3: 210, y3: 190, colored: false },
+                { type: 'circle', x: 580, y: 280, r: 25, colored: false },
+                { type: 'triangle', x1: 605, y1: 280, x2: 630, y2: 270, x3: 630, y3: 290, colored: false },
+                { type: 'circle', x: 550, y: 150, r: 20, colored: false },
+                { type: 'circle', x: 600, y: 190, r: 15, colored: false },
+                { type: 'circle', x: 630, y: 160, r: 18, colored: false },
+                { type: 'circle', x: 520, y: 220, r: 12, colored: false },
+                { type: 'rect', x: 50, y: 400, w: 20, h: 100, colored: false },
+                { type: 'rect', x: 640, y: 370, w: 25, h: 130, colored: false },
+                { type: 'circle', x: 250, y: 480, r: 25, colored: false },
+                { type: 'circle', x: 450, y: 490, r: 20, colored: false },
+                { type: 'rect', x: 80, y: 420, w: 20, h: 80, colored: false }
             ]
         };
         
-        const shapes = shapeSets[difficultyLevel] || shapeSets[1];
+        shapes = shapeSets[difficultyLevel] || shapeSets[1];
         
-        document.getElementById('start-button').addEventListener('click', function() {
-            document.getElementById('intro-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            initGame();
-        });
-        
-        // Auto-start if coming from Next Level button
-        if (sessionStorage.getItem('skipIntro') === 'true') {
-            sessionStorage.removeItem('skipIntro');
-            document.getElementById('intro-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            setTimeout(() => initGame(), 100);
-        }
-        
-        function initGame() {
-            console.log('InitGame called - v2');
-            startTime = Date.now();
-            
-            canvas = document.getElementById('coloringCanvas');
-            ctx = canvas.getContext('2d');
-            
-            // Set fixed canvas size
-            canvas.width = 600;
-            canvas.height = 400;
-            
-            // Create color palette (only if not already created)
-            const palette = document.getElementById('colorPalette');
-            console.log('Palette element:', palette);
-            console.log('Palette children:', palette ? palette.children.length : 'null');
-            
-            if (palette && palette.children.length === 0) {
-                console.log('Creating color buttons...');
-                colors.forEach((color, index) => {
-                    const btn = document.createElement('div');
-                    btn.className = 'color-btn';
-                    btn.style.backgroundColor = color;
-                    btn.onclick = () => selectColor(color, btn);
-                    palette.appendChild(btn);
-                    console.log('Added button', index, color);
-                });
-                
-                console.log('Buttons created. FirstChild:', palette.firstChild);
-                console.log('FirstChild type:', typeof palette.firstChild);
-                console.log('FirstChild classList:', palette.firstChild ? palette.firstChild.classList : 'no firstChild');
-                
-                // Select first color
-                if (palette.firstChild && palette.firstChild.classList) {
-                    palette.firstChild.classList.add('selected');
-                    console.log('Selected first button');
-                }
+        // Phaser configuration
+        const config = {
+            type: Phaser.AUTO,
+            width: gameWidth,
+            height: gameHeight,
+            parent: 'game-container',
+            backgroundColor: '#E8F4F8',
+            scene: {
+                create: create,
+                update: update
             }
-            
-            // Setup canvas click (remove old listeners first)
-            canvas.removeEventListener('click', handleCanvasClick);
-            canvas.removeEventListener('touchstart', handleCanvasTouch);
-            canvas.addEventListener('click', handleCanvasClick);
-            canvas.addEventListener('touchstart', handleCanvasTouch, { passive: false });
-            
-            // Draw initial coloring page
-            drawColoringPage();
-            
-            // Start background music
-            startBackgroundMusic();
-        }
+        };
         
-        function selectColor(color, btn) {
-            // Play sound
-            playColorSelectSound();
-            
-            // Remove selected class from all buttons
-            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
-            
-            // Add selected class to clicked button
-            btn.classList.add('selected');
-            currentColor = color;
-        }
+        const game = new Phaser.Game(config);
         
-        function drawColoringPage() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        function create() {
+            gameScene = this;
             
-            shapes.forEach(shape => {
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 3;
-                
-                if (shape.color) {
-                    ctx.fillStyle = shape.color;
-                } else {
-                    ctx.fillStyle = '#f5f5f5';
-                }
-                
-                if (shape.type === 'circle') {
-                    ctx.beginPath();
-                    ctx.arc(shape.x, shape.y, shape.r, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                } else if (shape.type === 'rect') {
-                    ctx.fillRect(shape.x, shape.y, shape.w, shape.h);
-                    ctx.strokeRect(shape.x, shape.y, shape.w, shape.h);
-                } else if (shape.type === 'triangle') {
-                    ctx.beginPath();
-                    ctx.moveTo(shape.x1, shape.y1);
-                    ctx.lineTo(shape.x2, shape.y2);
-                    ctx.lineTo(shape.x3, shape.y3);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.stroke();
-                }
-            });
-        }
-        
-        function drawSparkleAndWiggle(x, y, shapeIndex) {
-            const particles = [];
-            const particleCount = 15;
-            
-            // Create sparkle particles
-            for (let i = 0; i < particleCount; i++) {
-                const angle = (Math.PI * 2 / particleCount) * i + Math.random() * 0.3;
-                particles.push({
-                    x: x,
-                    y: y,
-                    vx: Math.cos(angle) * (2 + Math.random() * 3),
-                    vy: Math.sin(angle) * (2 + Math.random() * 3),
-                    life: 1.0,
-                    size: 3 + Math.random() * 3
-                });
-            }
-            
-            // Animate particles and wiggle
-            let frame = 0;
-            const maxFrames = 25;
-            
-            function animateParticles() {
-                frame++;
-                
-                // Calculate wiggle offset (faster wiggle in first frames)
-                const wiggleIntensity = Math.max(0, 1 - frame / 15);
-                const wiggleX = Math.sin(frame * 0.8) * 4 * wiggleIntensity;
-                const wiggleY = Math.cos(frame * 0.8) * 4 * wiggleIntensity;
-                
-                // Draw all shapes
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                shapes.forEach((shape, index) => {
-                    ctx.strokeStyle = '#333';
-                    ctx.lineWidth = 3;
-                    
-                    if (shape.color) {
-                        ctx.fillStyle = shape.color;
-                    } else {
-                        ctx.fillStyle = '#f5f5f5';
-                    }
-                    
-                    // Apply wiggle only to the colored shape
-                    const offsetX = (index === shapeIndex) ? wiggleX : 0;
-                    const offsetY = (index === shapeIndex) ? wiggleY : 0;
-                    
-                    if (shape.type === 'circle') {
-                        ctx.beginPath();
-                        ctx.arc(shape.x + offsetX, shape.y + offsetY, shape.r, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.stroke();
-                    } else if (shape.type === 'rect') {
-                        ctx.fillRect(shape.x + offsetX, shape.y + offsetY, shape.w, shape.h);
-                        ctx.strokeRect(shape.x + offsetX, shape.y + offsetY, shape.w, shape.h);
-                    } else if (shape.type === 'triangle') {
-                        ctx.beginPath();
-                        ctx.moveTo(shape.x1 + offsetX, shape.y1 + offsetY);
-                        ctx.lineTo(shape.x2 + offsetX, shape.y2 + offsetY);
-                        ctx.lineTo(shape.x3 + offsetX, shape.y3 + offsetY);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.stroke();
-                    }
-                });
-                
-                // Draw particles
-                particles.forEach(p => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.life -= 0.04;
-                    
-                    if (p.life > 0) {
-                        ctx.fillStyle = `rgba(255, 215, 0, ${p.life})`;
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-                        ctx.fill();
-                        
-                        // Add white glow
-                        ctx.fillStyle = `rgba(255, 255, 255, ${p.life * 0.5})`;
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.size * p.life * 0.5, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                });
-                
-                if (frame < maxFrames) {
-                    requestAnimationFrame(animateParticles);
-                } else {
-                    // Final redraw without wiggle
-                    drawColoringPage();
-                }
-            }
-            
-            animateParticles();
-        }
-        
-        function handleCanvasClick(e) {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-            
-            console.log('Canvas click:', x, y);
-            colorShape(x, y);
-        }
-        
-        function handleCanvasTouch(e) {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
-            const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
-            
-            console.log('Canvas touch:', x, y);
-            colorShape(x, y);
-        }
-        
-        function colorShape(x, y) {
-            let colored = false;
-            let sparkleX = x;
-            let sparkleY = y;
-            let coloredShapeIndex = -1;
-            
-            console.log('Checking shapes at:', x, y);
-            
-            shapes.forEach((shape, index) => {
-                let isInside = false;
-                
-                if (shape.type === 'circle') {
-                    const dx = x - shape.x;
-                    const dy = y - shape.y;
-                    isInside = (dx * dx + dy * dy) <= (shape.r * shape.r);
-                    if (isInside) {
-                        sparkleX = shape.x;
-                        sparkleY = shape.y;
-                    }
-                } else if (shape.type === 'rect') {
-                    isInside = x >= shape.x && x <= shape.x + shape.w &&
-                               y >= shape.y && y <= shape.y + shape.h;
-                    if (isInside) {
-                        sparkleX = shape.x + shape.w / 2;
-                        sparkleY = shape.y + shape.h / 2;
-                    }
-                } else if (shape.type === 'triangle') {
-                    isInside = pointInTriangle(x, y, shape.x1, shape.y1, shape.x2, shape.y2, shape.x3, shape.y3);
-                    if (isInside) {
-                        sparkleX = (shape.x1 + shape.x2 + shape.x3) / 3;
-                        sparkleY = (shape.y1 + shape.y2 + shape.y3) / 3;
-                    }
-                }
-                
-                if (isInside) {
-                    console.log('Hit shape:', index, shape.type);
-                    if (!shape.color) {
-                        coloredAreas++;
-                    }
-                    shape.color = currentColor;
-                    colored = true;
-                    coloredShapeIndex = index;
-                }
-            });
-            
-            if (colored) {
-                console.log('Redrawing with color:', currentColor);
-                drawColoringPage();
-                drawSparkleAndWiggle(sparkleX, sparkleY, coloredShapeIndex);
+            // Check if we should skip intro
+            if (sessionStorage.getItem('skipIntro') === 'true') {
+                sessionStorage.removeItem('skipIntro');
+                startGame();
             } else {
-                console.log('No shape clicked');
+                showIntro();
             }
         }
         
-        function pointInTriangle(px, py, x1, y1, x2, y2, x3, y3) {
-            const area = 0.5 * (-y2 * x3 + y1 * (-x2 + x3) + x1 * (y2 - y3) + x2 * y3);
-            const s = 1 / (2 * area) * (y1 * x3 - x1 * y3 + (y3 - y1) * px + (x1 - x3) * py);
-            const t = 1 / (2 * area) * (x1 * y2 - y1 * x2 + (y1 - y2) * px + (x2 - x1) * py);
-            return s > 0 && t > 0 && (1 - s - t) > 0;
+        function showIntro() {
+            // Background
+            const bg = gameScene.add.graphics();
+            bg.fillStyle(0x667eea, 1);
+            bg.fillRect(0, 0, gameWidth, gameHeight);
+            
+            // Title
+            const titleText = gameScene.add.text(gameWidth / 2, 120, 'Coloring Fun!', {
+                fontSize: '56px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            });
+            titleText.setOrigin(0.5);
+            
+            // Emoji
+            const emoji = gameScene.add.text(gameWidth / 2, 200, '🪼🎨', {
+                fontSize: '80px'
+            });
+            emoji.setOrigin(0.5);
+            
+            // Instructions
+            const difficultyText = difficultyConfig.name || 'Easy';
+            const shapeCount = shapes.length;
+            const instructions = gameScene.add.text(gameWidth / 2, gameHeight / 2, 
+                `Level: ${difficultyText}\n\nColor all ${shapeCount} shapes!\n\nClick a color, then click shapes to paint`, {
+                fontSize: '22px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                align: 'center',
+                lineSpacing: 10
+            });
+            instructions.setOrigin(0.5);
+            
+            // Start button
+            const button = gameScene.add.graphics();
+            button.fillStyle(0xffffff, 1);
+            button.fillRoundedRect(gameWidth / 2 - 100, gameHeight / 2 + 120, 200, 60, 10);
+            
+            const buttonText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 150, 'Start Coloring', {
+                fontSize: '28px',
+                fontFamily: 'Arial',
+                color: '#667eea',
+                fontStyle: 'bold'
+            });
+            buttonText.setOrigin(0.5);
+            
+            // Make button interactive
+            const buttonZone = gameScene.add.zone(gameWidth / 2, gameHeight / 2 + 150, 200, 60);
+            buttonZone.setInteractive({ useHandCursor: true });
+            buttonZone.on('pointerdown', () => {
+                bg.destroy();
+                titleText.destroy();
+                emoji.destroy();
+                instructions.destroy();
+                button.destroy();
+                buttonText.destroy();
+                buttonZone.destroy();
+                startGame();
+            });
+            
+            // Back button
+            const backButton = gameScene.add.text(20, 20, '← Back', {
+                fontSize: '24px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            });
+            backButton.setInteractive({ useHandCursor: true });
+            backButton.on('pointerdown', () => {
+                window.location.href = 'index.html';
+            });
         }
         
-        function clearCanvas() {
-            shapes.forEach(shape => shape.color = null);
-            coloredAreas = 0;
-            drawColoringPage();
+        function startGame() {
+            startTime = Date.now();
+            coloredCount = 0;
+            
+            // Title
+            const title = gameScene.add.text(gameWidth / 2, 30, '🎨 Color the Scene! 🎨', {
+                fontSize: '28px',
+                fontFamily: 'Arial',
+                color: '#1D3557',
+                fontStyle: 'bold'
+            });
+            title.setOrigin(0.5);
+            title.setDepth(100);
+            
+            // Color palette
+            const paletteY = 70;
+            const startX = 50;
+            const spacing = 40;
+            
+            colors.forEach((color, index) => {
+                const x = startX + (index % 8) * spacing;
+                const y = paletteY + Math.floor(index / 8) * spacing;
+                
+                const colorBox = gameScene.add.graphics();
+                colorBox.fillStyle(color, 1);
+                colorBox.fillRoundedRect(x - 15, y - 15, 30, 30, 5);
+                colorBox.lineStyle(3, index === 0 ? 0x000000 : 0x999999, 1);
+                colorBox.strokeRoundedRect(x - 15, y - 15, 30, 30, 5);
+                colorBox.setDepth(100);
+                
+                const zone = gameScene.add.zone(x, y, 30, 30);
+                zone.setInteractive({ useHandCursor: true });
+                zone.on('pointerdown', () => {
+                    selectedColor = color;
+                    // Update all color box borders
+                    gameScene.children.list.forEach(child => {
+                        if (child.colorBoxIndex !== undefined) {
+                            child.clear();
+                            const c = colors[child.colorBoxIndex];
+                            const cx = startX + (child.colorBoxIndex % 8) * spacing;
+                            const cy = paletteY + Math.floor(child.colorBoxIndex / 8) * spacing;
+                            child.fillStyle(c, 1);
+                            child.fillRoundedRect(cx - 15, cy - 15, 30, 30, 5);
+                            child.lineStyle(3, c === selectedColor ? 0x000000 : 0x999999, 1);
+                            child.strokeRoundedRect(cx - 15, cy - 15, 30, 30, 5);
+                        }
+                    });
+                });
+                zone.setDepth(101);
+                
+                colorBox.colorBoxIndex = index;
+            });
+            
+            // Draw shapes
+            drawShapes();
+            
+            // Progress text
+            const progressText = gameScene.add.text(gameWidth / 2, 160, `Colored: 0/${shapes.length}`, {
+                fontSize: '20px',
+                fontFamily: 'Arial',
+                color: '#457B9D',
+                fontStyle: 'bold'
+            });
+            progressText.setOrigin(0.5);
+            progressText.setDepth(100);
+            progressText.name = 'progressText';
+            
+            // Done button
+            const doneButton = gameScene.add.graphics();
+            doneButton.fillStyle(0x06FFA5, 1);
+            doneButton.fillRoundedRect(gameWidth / 2 - 80, gameHeight - 50, 160, 40, 10);
+            doneButton.setDepth(100);
+            
+            const doneText = gameScene.add.text(gameWidth / 2, gameHeight - 30, "I'm Done!", {
+                fontSize: '22px',
+                fontFamily: 'Arial',
+                color: '#1D3557',
+                fontStyle: 'bold'
+            });
+            doneText.setOrigin(0.5);
+            doneText.setDepth(101);
+            doneText.setInteractive({ useHandCursor: true });
+            doneText.on('pointerdown', () => {
+                completeColoring();
+            });
+        }
+        
+        function drawShapes() {
+            shapes.forEach((shape, index) => {
+                const graphics = gameScene.add.graphics();
+                graphics.lineStyle(3, 0x000000, 1);
+                
+                if (!shape.colored) {
+                    graphics.fillStyle(0xFFFFFF, 1);
+                } else {
+                    graphics.fillStyle(shape.color, 1);
+                }
+                
+                if (shape.type === 'circle') {
+                    graphics.fillCircle(shape.x, shape.y, shape.r);
+                    graphics.strokeCircle(shape.x, shape.y, shape.r);
+                } else if (shape.type === 'rect') {
+                    graphics.fillRect(shape.x, shape.y, shape.w, shape.h);
+                    graphics.strokeRect(shape.x, shape.y, shape.w, shape.h);
+                } else if (shape.type === 'triangle') {
+                    graphics.beginPath();
+                    graphics.moveTo(shape.x1, shape.y1);
+                    graphics.lineTo(shape.x2, shape.y2);
+                    graphics.lineTo(shape.x3, shape.y3);
+                    graphics.closePath();
+                    graphics.fillPath();
+                    graphics.strokePath();
+                }
+                
+                // Make interactive
+                let hitArea;
+                if (shape.type === 'circle') {
+                    hitArea = new Phaser.Geom.Circle(shape.x, shape.y, shape.r);
+                    const zone = gameScene.add.zone(shape.x, shape.y, shape.r * 2, shape.r * 2);
+                    zone.setInteractive(hitArea, Phaser.Geom.Circle.Contains);
+                    zone.setOrigin(0.5);
+                    zone.on('pointerdown', () => colorShape(index, graphics));
+                } else if (shape.type === 'rect') {
+                    const zone = gameScene.add.zone(shape.x + shape.w / 2, shape.y + shape.h / 2, shape.w, shape.h);
+                    zone.setInteractive({ useHandCursor: true });
+                    zone.on('pointerdown', () => colorShape(index, graphics));
+                } else if (shape.type === 'triangle') {
+                    const triangle = new Phaser.Geom.Triangle(shape.x1, shape.y1, shape.x2, shape.y2, shape.x3, shape.y3);
+                    const centerX = (shape.x1 + shape.x2 + shape.x3) / 3;
+                    const centerY = (shape.y1 + shape.y2 + shape.y3) / 3;
+                    const zone = gameScene.add.zone(centerX, centerY, 50, 50);
+                    zone.setInteractive(triangle, Phaser.Geom.Triangle.Contains);
+                    zone.on('pointerdown', () => colorShape(index, graphics));
+                }
+                
+                graphics.shapeIndex = index;
+            });
+        }
+        
+        function colorShape(index, graphics) {
+            const shape = shapes[index];
+            
+            if (!shape.colored) {
+                coloredCount++;
+                shape.colored = true;
+            }
+            
+            shape.color = selectedColor;
+            
+            // Redraw shape with new color
+            graphics.clear();
+            graphics.lineStyle(3, 0x000000, 1);
+            graphics.fillStyle(selectedColor, 1);
+            
+            if (shape.type === 'circle') {
+                graphics.fillCircle(shape.x, shape.y, shape.r);
+                graphics.strokeCircle(shape.x, shape.y, shape.r);
+            } else if (shape.type === 'rect') {
+                graphics.fillRect(shape.x, shape.y, shape.w, shape.h);
+                graphics.strokeRect(shape.x, shape.y, shape.w, shape.h);
+            } else if (shape.type === 'triangle') {
+                graphics.beginPath();
+                graphics.moveTo(shape.x1, shape.y1);
+                graphics.lineTo(shape.x2, shape.y2);
+                graphics.lineTo(shape.x3, shape.y3);
+                graphics.closePath();
+                graphics.fillPath();
+                graphics.strokePath();
+            }
+            
+            // Update progress text
+            const progressText = gameScene.children.list.find(child => child.name === 'progressText');
+            if (progressText) {
+                progressText.setText(`Colored: ${coloredCount}/${shapes.length}`);
+            }
         }
         
         function completeColoring() {
-            // Calculate score based on colored areas
-            const totalShapes = shapes.length;
-            const coloredShapes = shapes.filter(s => s.color !== null).length;
-            const score = Math.round((coloredShapes / totalShapes) * 100);
-            const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            startTime = null;
             
-            // Send completion data and track progress
-            const result = sendCompletionToWix(activityType, score, timeSpent, themeName);
+            // Clear scene
+            gameScene.children.removeAll();
             
-            // Progress to next difficulty level (more shapes to color)
-            progressDifficulty(activityType);
+            // Show completion screen
+            const overlay = gameScene.add.graphics();
+            overlay.fillStyle(0x667eea, 0.95);
+            overlay.fillRect(0, 0, gameWidth, gameHeight);
+            overlay.setDepth(200);
+            
+            const successText = gameScene.add.text(gameWidth / 2, gameHeight / 2 - 120, '🎉 Beautiful! 🎉', {
+                fontSize: '48px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            });
+            successText.setOrigin(0.5);
+            successText.setDepth(201);
+            
+            const completionText = gameScene.add.text(gameWidth / 2, gameHeight / 2 - 40, 
+                `You colored ${coloredCount} shapes!\nYour artwork is amazing!`, {
+                fontSize: '24px',
+                fontFamily: 'Arial',
+                color: '#ffffff',
+                align: 'center',
+                lineSpacing: 10
+            });
+            completionText.setOrigin(0.5);
+            completionText.setDepth(201);
+            
+            // Calculate score based on completion
+            const completionPercent = (coloredCount / shapes.length) * 100;
+            const score = Math.round(completionPercent);
+            const result = sendCompletionToWix(activityType, score, elapsed, themeName);
+            
+            console.log('🎯 Completion result:', result);
+            console.log('📊 Current difficulty before progression:', difficultyLevel);
+            
+            // Progress difficulty
+            const oldDiff = getDifficultyLevel(difficultyKey);
+            progressDifficulty(difficultyKey);
+            const newDiff = getDifficultyLevel(difficultyKey);
+            
+            console.log('📈 Difficulty progression:', oldDiff, '→', newDiff);
+            
+            // Check if we've reached max difficulty
+            const maxDifficulty = DIFFICULTY_LEVELS[difficultyKey].length;
+            const hasMoreLevels = newDiff < maxDifficulty;
+            
+            console.log('🎯 Max difficulty:', maxDifficulty, '| Has more levels:', hasMoreLevels);
             
             // Show achievements
             if (result.newAchievements && result.newAchievements.length > 0) {
@@ -750,34 +455,55 @@
                 }, 1000);
             }
             
-            // Show completion screen
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('completion-screen').style.display = 'block';
-        }
-        
-        function toggleSound() {
-            const soundBtn = document.getElementById('sound-toggle');
-            if (musicGain.gain.value > 0) {
-                musicGain.gain.value = 0;
-                soundBtn.textContent = '🔇 Sound';
+            // Next Level or completion button
+            if (hasMoreLevels) {
+                const nextButton = gameScene.add.graphics();
+                nextButton.fillStyle(0xffffff, 1);
+                nextButton.fillRoundedRect(gameWidth / 2 - 100, gameHeight / 2 + 60, 200, 60, 10);
+                nextButton.setDepth(201);
+                
+                const nextText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 90, 'Next Level', {
+                    fontSize: '28px',
+                    fontFamily: 'Arial',
+                    color: '#667eea',
+                    fontStyle: 'bold'
+                });
+                nextText.setOrigin(0.5);
+                nextText.setDepth(202);
+                nextText.setInteractive({ useHandCursor: true });
+                nextText.on('pointerdown', () => {
+                    console.log('Next Level clicked - reloading with difficulty:', newDiff);
+                    sessionStorage.setItem('skipIntro', 'true');
+                    location.reload();
+                });
             } else {
-                musicGain.gain.value = 0.12;
-                soundBtn.textContent = '🔊 Sound';
-                if (!isMusicPlaying) {
-                    startBackgroundMusic();
-                }
+                const completeText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 90, '🏆 All Levels Complete! 🏆', {
+                    fontSize: '24px',
+                    fontFamily: 'Arial',
+                    color: '#06FFA5',
+                    fontStyle: 'bold'
+                });
+                completeText.setOrigin(0.5);
+                completeText.setDepth(202);
             }
+            
+            // Back to menu button
+            const backText = gameScene.add.text(gameWidth / 2, gameHeight / 2 + 160, '← Back to Menu', {
+                fontSize: '20px',
+                fontFamily: 'Arial',
+                color: '#ffffff'
+            });
+            backText.setOrigin(0.5);
+            backText.setDepth(202);
+            backText.setInteractive({ useHandCursor: true });
+            backText.on('pointerdown', () => {
+                console.log('Back to Menu clicked');
+                window.location.href = 'index.html';
+            });
         }
         
-        function restartGame() {
-            // Set flag to skip intro on reload
-            sessionStorage.setItem('skipIntro', 'true');
-            location.reload();
-        }
-        
-        function goBack() {
-            stopBackgroundMusic();
-            window.location.href = 'index.html';
+        function update() {
+            // Game loop
         }
     </script>
 </body>
