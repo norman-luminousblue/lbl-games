@@ -267,8 +267,11 @@
         <div id="completion-screen">
             <div class="emoji">🎉</div>
             <h1>Amazing Work!</h1>
-            <p style="font-size: 1.2em; color: #666; margin-bottom: 30px;">Your artwork is beautiful!</p>
-            <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+            <p style="font-size: 1.2em; color: #666; margin-bottom: 20px;">Your artwork is beautiful!</p>
+            <div class="controls">
+                <button class="btn btn-done" onclick="location.reload()">Next Level ⬆️</button>
+                <button class="btn btn-back" onclick="goBack()">← Back to Menu</button>
+            </div>
         </div>
     </div>
     
@@ -356,6 +359,7 @@
         
         // Get difficulty level and load appropriate shapes
         const difficultyLevel = getDifficultyLevel('coloring');
+        console.log('Coloring game difficulty level:', difficultyLevel);
         
         // Jellyfish themed shapes - different complexity levels
         const shapeSets = {
