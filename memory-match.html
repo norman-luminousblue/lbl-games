@@ -561,15 +561,15 @@
                 window.location.href = 'index.html';
             });
             
-            // Play again button
-            const playAgainBtn = scene.add.rectangle(sceneWidth / 2 + btnSpacing / 2, btnY, btnWidth, 50, 0xFF6B35);
-            playAgainBtn.setInteractive();
-            const btnText = scene.add.text(sceneWidth / 2 + btnSpacing / 2, btnY, 'Play Again', {
+            // Next Level button
+            const nextLevelBtn = scene.add.rectangle(sceneWidth / 2 + btnSpacing / 2, btnY, btnWidth, 50, 0x51cf66);
+            nextLevelBtn.setInteractive();
+            const btnText = scene.add.text(sceneWidth / 2 + btnSpacing / 2, btnY, 'Next Level ⬆️', {
                 fontSize: '20px',
                 color: '#ffffff'
             }).setOrigin(0.5);
             
-            playAgainBtn.on('pointerdown', () => {
+            nextLevelBtn.on('pointerdown', () => {
                 location.reload();
             });
         }
