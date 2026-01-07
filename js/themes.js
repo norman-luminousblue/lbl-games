@@ -104,6 +104,11 @@ const DIFFICULTY_LEVELS = {
         { level: 2, pairs: 8, timeBonus: 10, name: 'Medium' },
         { level: 3, pairs: 10, timeBonus: 20, name: 'Hard' }
     ],
+    coloring: [
+        { level: 1, shapes: 8, name: 'Easy' },
+        { level: 2, shapes: 13, name: 'Medium' },
+        { level: 3, shapes: 20, name: 'Hard' }
+    ],
     maze: [
         { level: 1, complexity: 'simple', size: 10, name: 'Easy' },
         { level: 2, complexity: 'medium', size: 12, name: 'Medium' },

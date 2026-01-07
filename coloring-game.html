@@ -354,28 +354,77 @@
             '#06FFA5', '#FFFFFF', '#000000', '#8B4513'
         ];
         
-        // Jellyfish themed shapes - NO overlaps, well-separated for 600x400 canvas
-        const shapes = [
-            // Jellyfish bell (main body)
-            { type: 'circle', x: 300, y: 120, r: 60, color: null },
-            // Jellyfish tentacles (3 wavy lines represented as rectangles)
-            { type: 'rect', x: 270, y: 180, w: 15, h: 120, color: null },
-            { type: 'rect', x: 295, y: 190, w: 15, h: 130, color: null },
-            { type: 'rect', x: 320, y: 185, w: 15, h: 125, color: null },
-            // Small fish friend
-            { type: 'circle', x: 100, y: 100, r: 30, color: null },
-            { type: 'triangle', x1: 130, y1: 100, x2: 160, y2: 90, x3: 160, y3: 110, color: null }, // fish tail
-            // Bubbles
-            { type: 'circle', x: 450, y: 80, r: 20, color: null },
-            { type: 'circle', x: 500, y: 120, r: 15, color: null },
-            { type: 'circle', x: 530, y: 90, r: 18, color: null },
-            // Seaweed
-            { type: 'rect', x: 50, y: 280, w: 20, h: 100, color: null },
-            { type: 'rect', x: 540, y: 250, w: 25, h: 130, color: null },
-            // Ocean floor elements
-            { type: 'circle', x: 200, y: 350, r: 25, color: null }, // shell
-            { type: 'circle', x: 400, y: 360, r: 20, color: null }  // coral
-        ];
+        // Get difficulty level and load appropriate shapes
+        const difficultyLevel = getDifficultyLevel('coloring');
+        
+        // Jellyfish themed shapes - different complexity levels
+        const shapeSets = {
+            1: [ // EASY - 8 simple shapes
+                // Jellyfish bell (main body)
+                { type: 'circle', x: 300, y: 120, r: 60, color: null },
+                // Jellyfish tentacles (2 simple)
+                { type: 'rect', x: 280, y: 180, w: 15, h: 120, color: null },
+                { type: 'rect', x: 310, y: 185, w: 15, h: 125, color: null },
+                // Small fish friend
+                { type: 'circle', x: 100, y: 100, r: 30, color: null },
+                { type: 'triangle', x1: 130, y1: 100, x2: 160, y2: 90, x3: 160, y3: 110, color: null },
+                // Bubbles
+                { type: 'circle', x: 450, y: 80, r: 20, color: null },
+                { type: 'circle', x: 500, y: 120, r: 15, color: null },
+                // Seaweed
+                { type: 'rect', x: 50, y: 280, w: 20, h: 100, color: null }
+            ],
+            2: [ // MEDIUM - 13 shapes (original)
+                // Jellyfish bell
+                { type: 'circle', x: 300, y: 120, r: 60, color: null },
+                // Jellyfish tentacles (3)
+                { type: 'rect', x: 270, y: 180, w: 15, h: 120, color: null },
+                { type: 'rect', x: 295, y: 190, w: 15, h: 130, color: null },
+                { type: 'rect', x: 320, y: 185, w: 15, h: 125, color: null },
+                // Small fish friend
+                { type: 'circle', x: 100, y: 100, r: 30, color: null },
+                { type: 'triangle', x1: 130, y1: 100, x2: 160, y2: 90, x3: 160, y3: 110, color: null },
+                // Bubbles
+                { type: 'circle', x: 450, y: 80, r: 20, color: null },
+                { type: 'circle', x: 500, y: 120, r: 15, color: null },
+                { type: 'circle', x: 530, y: 90, r: 18, color: null },
+                // Seaweed
+                { type: 'rect', x: 50, y: 280, w: 20, h: 100, color: null },
+                { type: 'rect', x: 540, y: 250, w: 25, h: 130, color: null },
+                // Ocean floor elements
+                { type: 'circle', x: 200, y: 350, r: 25, color: null },
+                { type: 'circle', x: 400, y: 360, r: 20, color: null }
+            ],
+            3: [ // HARD - 20 shapes (more detailed)
+                // Jellyfish bell with details
+                { type: 'circle', x: 300, y: 120, r: 60, color: null },
+                { type: 'circle', x: 300, y: 115, r: 35, color: null }, // inner detail
+                // Jellyfish tentacles (5)
+                { type: 'rect', x: 260, y: 180, w: 12, h: 120, color: null },
+                { type: 'rect', x: 280, y: 185, w: 12, h: 130, color: null },
+                { type: 'rect', x: 300, y: 190, w: 12, h: 125, color: null },
+                { type: 'rect', x: 320, y: 185, w: 12, h: 130, color: null },
+                { type: 'rect', x: 340, y: 180, w: 12, h: 120, color: null },
+                // Two fish friends
+                { type: 'circle', x: 100, y: 100, r: 30, color: null },
+                { type: 'triangle', x1: 130, y1: 100, x2: 160, y2: 90, x3: 160, y3: 110, color: null },
+                { type: 'circle', x: 480, y: 200, r: 25, color: null },
+                { type: 'triangle', x1: 505, y1: 200, x2: 530, y2: 190, x3: 530, y3: 210, color: null },
+                // More bubbles
+                { type: 'circle', x: 450, y: 80, r: 20, color: null },
+                { type: 'circle', x: 500, y: 120, r: 15, color: null },
+                { type: 'circle', x: 530, y: 90, r: 18, color: null },
+                { type: 'circle', x: 420, y: 150, r: 12, color: null },
+                // More seaweed
+                { type: 'rect', x: 50, y: 280, w: 20, h: 100, color: null },
+                { type: 'rect', x: 540, y: 250, w: 25, h: 130, color: null },
+                // Ocean floor details
+                { type: 'circle', x: 200, y: 350, r: 25, color: null },
+                { type: 'circle', x: 400, y: 360, r: 20, color: null }
+            ]
+        };
+        
+        const shapes = shapeSets[difficultyLevel] || shapeSets[1];
         
         document.getElementById('start-button').addEventListener('click', function() {
             document.getElementById('intro-screen').style.display = 'none';
@@ -677,8 +726,8 @@
             // Send completion data and track progress
             const result = sendCompletionToWix(activityType, score, timeSpent, themeName);
             
-            // Note: Coloring doesn't have progressive difficulty - same image each time
-            // Just track completion for achievements
+            // Progress to next difficulty level (more shapes to color)
+            progressDifficulty(activityType);
             
             // Show achievements
             if (result.newAchievements && result.newAchievements.length > 0) {
