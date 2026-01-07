@@ -179,7 +179,7 @@
         <div id="game-screen">
             <h1>🪼 Connect the Dots 🪼</h1>
             <div id="instructions">Click the dots in order: 1, 2, 3...</div>
-            <div id="progress">Dot: 0/15</div>
+            <div id="progress">Dot: 0/19</div>
             
             <canvas id="dotsCanvas" width="700" height="500"></canvas>
             
@@ -208,23 +208,25 @@
         
         // Jellyfish shape coordinates (bell and tentacles)
         const dots = [
-            {num: 1, x: 350, y: 100},   // Top of bell
-            {num: 2, x: 400, y: 130},   // Right side of bell
-            {num: 3, x: 420, y: 180},
-            {num: 4, x: 420, y: 230},   // Bottom right of bell
-            {num: 5, x: 400, y: 270},
-            {num: 6, x: 350, y: 290},   // Bottom center
-            {num: 7, x: 300, y: 270},
-            {num: 8, x: 280, y: 230},   // Bottom left of bell
-            {num: 9, x: 280, y: 180},
-            {num: 10, x: 300, y: 130},  // Left side of bell
-            {num: 11, x: 350, y: 100},  // Back to top (close bell)
-            {num: 12, x: 320, y: 290},  // Tentacle 1
-            {num: 13, x: 310, y: 380},
-            {num: 14, x: 350, y: 290},  // Tentacle 2
-            {num: 15, x: 340, y: 400},
-            {num: 16, x: 380, y: 290},  // Tentacle 3
-            {num: 17, x: 390, y: 380}
+            {num: 1, x: 280, y: 100},   // Top left of bell
+            {num: 2, x: 350, y: 80},    // Top center
+            {num: 3, x: 420, y: 100},   // Top right
+            {num: 4, x: 450, y: 140},   // Right side
+            {num: 5, x: 460, y: 190},
+            {num: 6, x: 450, y: 240},   // Bottom right of bell
+            {num: 7, x: 400, y: 270},   // Bottom right curve
+            {num: 8, x: 350, y: 280},   // Bottom center
+            {num: 9, x: 300, y: 270},   // Bottom left curve
+            {num: 10, x: 250, y: 240},  // Bottom left of bell
+            {num: 11, x: 240, y: 190},  // Left side
+            {num: 12, x: 250, y: 140},  // Upper left
+            {num: 13, x: 280, y: 100},  // Back to start (close bell)
+            {num: 14, x: 300, y: 280},  // Start tentacle 1
+            {num: 15, x: 290, y: 360},  // End tentacle 1
+            {num: 16, x: 350, y: 280},  // Start tentacle 2 (center)
+            {num: 17, x: 350, y: 380},  // End tentacle 2
+            {num: 18, x: 400, y: 280},  // Start tentacle 3
+            {num: 19, x: 410, y: 360}   // End tentacle 3
         ];
         
         const totalDots = dots.length;
@@ -252,7 +254,7 @@
                 ctx.lineCap = 'round';
                 ctx.beginPath();
                 ctx.moveTo(dots[0].x, dots[0].y);
-                for (let i = 1; i < currentDot; i++) {
+                for (let i = 1; i < Math.min(currentDot, dots.length); i++) {
                     ctx.lineTo(dots[i].x, dots[i].y);
                 }
                 ctx.stroke();
@@ -283,16 +285,21 @@
                     ctx.fill();
                 }
                 
-                // Draw number
+                // Draw number with background for better visibility
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y - 22, 14, 0, Math.PI * 2);
+                ctx.fill();
+                
                 ctx.fillStyle = '#333';
                 ctx.font = 'bold 16px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(dot.num, dot.x, dot.y - 20);
+                ctx.fillText(dot.num, dot.x, dot.y - 22);
             });
             
             // Update progress
-            document.getElementById('progress').textContent = `Dot: ${currentDot - 1}/${totalDots}`;
+            document.getElementById('progress').textContent = `Dot: ${Math.max(0, currentDot - 1)}/${totalDots}`;
         }
         
         function handleClick(e) {
@@ -330,11 +337,11 @@
         function completeGame() {
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
             
-            // Draw final filled jellyfish
+            // Draw final filled jellyfish bell
             ctx.fillStyle = 'rgba(168, 218, 220, 0.5)';
             ctx.beginPath();
             ctx.moveTo(dots[0].x, dots[0].y);
-            for (let i = 1; i <= 10; i++) {
+            for (let i = 1; i <= 12; i++) {
                 ctx.lineTo(dots[i].x, dots[i].y);
             }
             ctx.closePath();
