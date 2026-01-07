@@ -48,8 +48,7 @@
         const activityType = sessionStorage.getItem('currentActivityType') || 'connect-dots';
         applyTheme(currentTheme);
         
-        // Activity tracking
-        const activityTracker = new ActivityTracker();
+        // Activity tracking (activityTracker is defined in rewards.js)
         let startTime;
         
         // Get difficulty level
