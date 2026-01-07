@@ -220,28 +220,42 @@
         let currentDot = 1;
         let startTime;
         
-        // Jellyfish shape coordinates (bell and tentacles)
-        const dots = [
-            {num: 1, x: 280, y: 100},   // Top left of bell
-            {num: 2, x: 350, y: 80},    // Top center
-            {num: 3, x: 420, y: 100},   // Top right
-            {num: 4, x: 450, y: 140},   // Right side
-            {num: 5, x: 460, y: 190},
-            {num: 6, x: 450, y: 240},   // Bottom right of bell
-            {num: 7, x: 400, y: 270},   // Bottom right curve
-            {num: 8, x: 350, y: 280},   // Bottom center
-            {num: 9, x: 300, y: 270},   // Bottom left curve
-            {num: 10, x: 250, y: 240},  // Bottom left of bell
-            {num: 11, x: 240, y: 190},  // Left side
-            {num: 12, x: 250, y: 140},  // Upper left
-            {num: 13, x: 280, y: 100},  // Back to start (close bell)
-            {num: 14, x: 300, y: 280},  // Start tentacle 1
-            {num: 15, x: 290, y: 360},  // End tentacle 1
-            {num: 16, x: 350, y: 280},  // Start tentacle 2 (center)
-            {num: 17, x: 350, y: 380},  // End tentacle 2
-            {num: 18, x: 400, y: 280},  // Start tentacle 3
-            {num: 19, x: 410, y: 360}   // End tentacle 3
-        ];
+        // Get difficulty level
+        const difficultyLevel = getDifficultyLevel(activityType);
+        const difficultyConfig = DIFFICULTY_LEVELS.dots[difficultyLevel - 1];
+        
+        // Jellyfish shape coordinates - different complexities
+        const dotSets = {
+            1: [ // EASY - 15 dots (simple jellyfish)
+                {num: 1, x: 300, y: 100}, {num: 2, x: 360, y: 90}, {num: 3, x: 420, y: 110},
+                {num: 4, x: 450, y: 160}, {num: 5, x: 440, y: 220}, {num: 6, x: 380, y: 260},
+                {num: 7, x: 320, y: 270}, {num: 8, x: 260, y: 250}, {num: 9, x: 220, y: 200},
+                {num: 10, x: 230, y: 140}, {num: 11, x: 270, y: 110}, {num: 12, x: 300, y: 280},
+                {num: 13, x: 290, y: 350}, {num: 14, x: 370, y: 280}, {num: 15, x: 380, y: 360}
+            ],
+            2: [ // MEDIUM - 20 dots (original)
+                {num: 1, x: 280, y: 100}, {num: 2, x: 350, y: 80}, {num: 3, x: 420, y: 100},
+                {num: 4, x: 450, y: 140}, {num: 5, x: 460, y: 190}, {num: 6, x: 450, y: 240},
+                {num: 7, x: 400, y: 270}, {num: 8, x: 350, y: 280}, {num: 9, x: 300, y: 270},
+                {num: 10, x: 250, y: 240}, {num: 11, x: 240, y: 190}, {num: 12, x: 250, y: 140},
+                {num: 13, x: 280, y: 100}, {num: 14, x: 300, y: 280}, {num: 15, x: 290, y: 360},
+                {num: 16, x: 350, y: 280}, {num: 17, x: 350, y: 380}, {num: 18, x: 400, y: 280},
+                {num: 19, x: 410, y: 360}, {num: 20, x: 300, y: 100}
+            ],
+            3: [ // HARD - 25 dots (detailed jellyfish)
+                {num: 1, x: 280, y: 100}, {num: 2, x: 320, y: 85}, {num: 3, x: 360, y: 80},
+                {num: 4, x: 400, y: 90}, {num: 5, x: 430, y: 115}, {num: 6, x: 455, y: 150},
+                {num: 7, x: 465, y: 195}, {num: 8, x: 460, y: 235}, {num: 9, x: 440, y: 265},
+                {num: 10, x: 405, y: 280}, {num: 11, x: 365, y: 288}, {num: 12, x: 325, y: 285},
+                {num: 13, x: 285, y: 275}, {num: 14, x: 250, y: 255}, {num: 15, x: 230, y: 220},
+                {num: 16, x: 225, y: 180}, {num: 17, x: 235, y: 140}, {num: 18, x: 260, y: 110},
+                {num: 19, x: 280, y: 100}, {num: 20, x: 285, y: 285}, {num: 21, x: 280, y: 360},
+                {num: 22, x: 340, y: 288}, {num: 23, x: 340, y: 380}, {num: 24, x: 395, y: 285},
+                {num: 25, x: 405, y: 365}
+            ]
+        };
+        
+        const dots = dotSets[difficultyLevel] || dotSets[1];
         
         const totalDots = dots.length;
         

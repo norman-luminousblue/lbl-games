@@ -263,15 +263,43 @@
         let startTime;
         let foundDifferences = [];
         
-        // Differences: {x, y, radius, description}
-        const differences = [
-            {x: 100, y: 80, r: 25, desc: 'Star missing'},
-            {x: 300, y: 120, r: 30, desc: 'Fish color different'},
-            {x: 350, y: 250, r: 30, desc: 'Shell missing'},
-            {x: 150, y: 280, r: 25, desc: 'Seaweed shorter'},
-            {x: 250, y: 180, r: 35, desc: 'Jellyfish eye'}
-        ];
+        // Get difficulty level
+        const difficultyLevel = getDifficultyLevel(activityType);
+        const difficultyConfig = DIFFICULTY_LEVELS.difference[difficultyLevel - 1];
         
+        // Differences: {x, y, radius, description} - different difficulty levels
+        const differenceSets = {
+            1: [ // EASY - 5 differences
+                {x: 100, y: 80, r: 25, desc: 'Star missing'},
+                {x: 300, y: 120, r: 30, desc: 'Fish color different'},
+                {x: 350, y: 250, r: 30, desc: 'Shell missing'},
+                {x: 150, y: 280, r: 25, desc: 'Seaweed shorter'},
+                {x: 250, y: 180, r: 35, desc: 'Jellyfish eye'}
+            ],
+            2: [ // MEDIUM - 7 differences
+                {x: 100, y: 80, r: 25, desc: 'Star missing'},
+                {x: 300, y: 120, r: 30, desc: 'Fish color different'},
+                {x: 350, y: 250, r: 30, desc: 'Shell missing'},
+                {x: 150, y: 280, r: 25, desc: 'Seaweed shorter'},
+                {x: 250, y: 180, r: 35, desc: 'Jellyfish eye'},
+                {x: 450, y: 100, r: 20, desc: 'Bubble size'},
+                {x: 500, y: 300, r: 25, desc: 'Coral shape'}
+            ],
+            3: [ // HARD - 10 differences
+                {x: 100, y: 80, r: 25, desc: 'Star missing'},
+                {x: 300, y: 120, r: 30, desc: 'Fish color different'},
+                {x: 350, y: 250, r: 30, desc: 'Shell missing'},
+                {x: 150, y: 280, r: 25, desc: 'Seaweed shorter'},
+                {x: 250, y: 180, r: 35, desc: 'Jellyfish eye'},
+                {x: 450, y: 100, r: 20, desc: 'Bubble size'},
+                {x: 500, y: 300, r: 25, desc: 'Coral shape'},
+                {x: 80, y: 300, r: 20, desc: 'Rock color'},
+                {x: 550, y: 200, r: 22, desc: 'Fish fin'},
+                {x: 200, y: 150, r: 28, desc: 'Wave pattern'}
+            ]
+        };
+        
+        const differences = differenceSets[difficultyLevel] || differenceSets[1];
         const totalDifferences = differences.length;
         
         document.getElementById('start-button').addEventListener('click', function() {

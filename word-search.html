@@ -257,8 +257,13 @@
         
         const canvas = document.getElementById('puzzleCanvas');
         const ctx = canvas.getContext('2d');
-        const gridSize = 10;
-        const cellSize = 50;
+        
+        // Get difficulty level
+        const difficultyLevel = getDifficultyLevel(activityType);
+        const difficultyConfig = DIFFICULTY_LEVELS.wordSearch[difficultyLevel - 1];
+        
+        const gridSize = difficultyConfig.gridSize;
+        const cellSize = Math.floor(500 / gridSize); // Adjust cell size based on grid
         let grid = [];
         let isSelecting = false;
         let startCell = null;
@@ -266,16 +271,13 @@
         let foundWords = [];
         let startTime;
         
-        const words = currentTheme.words || [
-            'JELLYFISH',
-            'OCEAN',
-            'CORAL',
-            'WAVE',
-            'SHELL',
-            'FISH',
-            'CRAB',
-            'STAR'
+        // Theme-based words, limited by difficulty
+        const themeWords = currentTheme.words || [
+            'JELLYFISH', 'OCEAN', 'CORAL', 'WAVE', 'SHELL', 'FISH', 'CRAB', 'STAR',
+            'WATER', 'BLUE', 'SEA', 'TIDE'
         ];
+        
+        const words = themeWords.slice(0, difficultyConfig.words);
         
         const wordPositions = [];
         
