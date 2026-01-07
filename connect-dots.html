@@ -48,17 +48,23 @@
         const activityType = sessionStorage.getItem('currentActivityType') || 'connect-dots';
         applyTheme(currentTheme);
         
+        // Map activity type to difficulty level key
+        const difficultyKey = 'dots'; // connect-dots maps to 'dots' in DIFFICULTY_LEVELS
+        
         // Activity tracking (activityTracker is defined in rewards.js)
         let startTime;
         
         // Get difficulty level
-        const difficultyLevel = getDifficultyLevel(activityType);
-        const difficultyConfig = DIFFICULTY_LEVELS.dots[difficultyLevel - 1];
+        const difficultyLevel = getDifficultyLevel(difficultyKey);
+        const difficultyConfig = DIFFICULTY_LEVELS[difficultyKey][difficultyLevel - 1];
         
         console.log('🎮 PHASER VERSION LOADED');
+        console.log('Activity Type:', activityType, '(for rewards)');
+        console.log('Difficulty Key:', difficultyKey, '(for progression)');
         console.log('Difficulty Level:', difficultyLevel);
         console.log('Difficulty Config:', difficultyConfig);
-        console.log('Activity Type:', activityType);
+        console.log('LocalStorage key:', `difficulty_${difficultyKey}`);
+        console.log('LocalStorage value:', localStorage.getItem(`difficulty_${difficultyKey}`));
         
         // Dot sets for different difficulties
         const dotSets = {
@@ -324,10 +330,10 @@
             
             // Send completion data
             const result = sendCompletionToWix(activityType, score, timeSpent, themeName);
-            const newDifficulty = progressDifficulty(activityType);
+            const newDifficulty = progressDifficulty(difficultyKey);
             
             console.log('New difficulty after progression:', newDifficulty);
-            console.log('Next time will have dots:', DIFFICULTY_LEVELS.dots[newDifficulty - 1].count);
+            console.log('Next time will have dots:', DIFFICULTY_LEVELS[difficultyKey][newDifficulty - 1].dots);
             
             // Show achievements
             if (result.newAchievements && result.newAchievements.length > 0) {
